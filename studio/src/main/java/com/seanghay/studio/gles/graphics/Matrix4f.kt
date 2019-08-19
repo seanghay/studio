@@ -3,8 +3,8 @@ package com.seanghay.studio.gles.graphics
 import android.opengl.Matrix
 
 
-internal fun mat4(elements: FloatArray) = Matrix4f(elements)
-internal fun mat4() = Matrix4f()
+fun mat4(elements: FloatArray) = Matrix4f(elements)
+fun mat4() = Matrix4f()
 
 data class Matrix4f(var elements: FloatArray = FloatArray(4 * 4)): Iterator<Float> by elements.iterator() {
 

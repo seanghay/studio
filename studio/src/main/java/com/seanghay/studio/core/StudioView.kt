@@ -3,6 +3,7 @@ package com.seanghay.studio.core
 import android.content.Context
 import android.util.AttributeSet
 import android.view.TextureView
+import java.io.File
 
 class StudioView: TextureView {
 
@@ -13,4 +14,9 @@ class StudioView: TextureView {
     constructor(context: Context, attributeSet: AttributeSet, defStyle: Int): super(context, attributeSet, defStyle)
 
     init { surfaceTextureListener = studioEngine }
+
+    fun setFiles(files: List<File>) {
+        studioEngine.files = files
+        studioEngine.begin()
+    }
 }

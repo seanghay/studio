@@ -5,6 +5,7 @@ import android.opengl.GLES20.*
 import android.util.Size
 import android.view.TextureView
 import com.seanghay.studio.gles.RenderContext
+import java.io.File
 
 
 class StudioEngine: TextureView.SurfaceTextureListener {
@@ -12,6 +13,8 @@ class StudioEngine: TextureView.SurfaceTextureListener {
     private var viewportWidth: Int = 0
     private var viewportHeight: Int = 0
     private lateinit var renderThread: StudioRenderThread
+
+    var files: List<File> = listOf()
 
     private fun setViewport(width: Int, height: Int) {
         viewportWidth = width
@@ -53,6 +56,7 @@ class StudioEngine: TextureView.SurfaceTextureListener {
         onSurfaceCreated(surface, width, height)
     }
 
-
-
+    fun begin() {
+        println(this.files)
+    }
 }
