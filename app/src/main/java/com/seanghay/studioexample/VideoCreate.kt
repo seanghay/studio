@@ -1,11 +1,7 @@
 package com.seanghay.studioexample
 
-import android.graphics.Bitmap
 import android.media.*
-import android.opengl.*
-import android.opengl.GLES20.*
 import android.util.Log
-import android.view.Surface
 import com.seanghay.studio.gles.egl.EglCore
 import com.seanghay.studio.gles.egl.EglWindowSurface
 import java.io.File
@@ -13,16 +9,14 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import kotlin.math.round
 import kotlin.math.roundToInt
-import kotlin.math.roundToLong
 
 class VideoCreate(
     private val files: List<File>,
     private val outputDir: File,
     private val bgmPath: String,
     private val progressListener: (Int) -> Unit,
-    private val completed: (String) -> Unit) {
-
-
+    private val completed: (String) -> Unit
+) {
 
     private var renderer: ImageRender? = null
 
@@ -84,8 +78,6 @@ class VideoCreate(
 
         val timeTaken = (System.nanoTime() - startedAt) / ONE_BILLION
         Log.d(TAG, "time_taken=$timeTaken seconds")
-
-
     }
 
     private fun configureBgmEncoder() {
@@ -99,7 +91,7 @@ class VideoCreate(
             val bitrate = format.getInteger(MediaFormat.KEY_BIT_RATE)
 
             Log.d(TAG, "sample_rate=$sampleRate")
-            if (mimeType.startsWith("audio")){
+            if (mimeType.startsWith("audio")) {
                 this.bgmTrackIndex = trackIndex
                 audioTrackIndex = muxer!!.addTrack(format)
                 Log.d(TAG, "Audio format: $format")
@@ -143,7 +135,7 @@ class VideoCreate(
             encoder!!.signalEndOfInputStream()
         }
 
-        var encoderOutputBuffers  = encoder!!.outputBuffers
+        var encoderOutputBuffers = encoder!!.outputBuffers
 
         var bufferSize = MAX_SAMPLE_SIZE
         val audioBufferInfo = MediaCodec.BufferInfo()
@@ -155,7 +147,6 @@ class VideoCreate(
 
             val encoderStatus = encoder!!.dequeueOutputBuffer(bufferInfo, TIMEOUT_SEC)
             if (encoderStatus == MediaCodec.INFO_TRY_AGAIN_LATER) {
-
                 if (!endOfStream) {
                     break
                 } else {
@@ -177,7 +168,8 @@ class VideoCreate(
                 Log.w(TAG, "unexpected result from encoder.dequeueOutputBuffer: $encoderStatus")
             } else {
 
-                val encodedData = encoderOutputBuffers[encoderStatus] ?: throw RuntimeException("encoderOutputBuffer[$encoderStatus] was null")
+                val encodedData = encoderOutputBuffers[encoderStatus]
+                    ?: throw RuntimeException("encoderOutputBuffer[$encoderStatus] was null")
 
                 if (bufferInfo.flags and MediaCodec.BUFFER_FLAG_CODEC_CONFIG != 0) {
                     Log.d(TAG, "ignoring BUFFER_FLAG_CODEC_CONFIG")
@@ -198,7 +190,8 @@ class VideoCreate(
                     if (!audioDone) {
 
                         audioBufferInfo.offset = bufferInfo.offset
-                        audioBufferInfo.size = extractor!!.readSampleData(dstBuf, audioBufferInfo.offset)
+                        audioBufferInfo.size =
+                            extractor!!.readSampleData(dstBuf, audioBufferInfo.offset)
 
                         if (audioBufferInfo.size != 0) {
                             audioBufferInfo.presentationTimeUs = extractor!!.sampleTime
@@ -237,7 +230,10 @@ class VideoCreate(
         val format = MediaFormat.createVideoFormat(OUTPUT_MIME_TYPE, width, height)
 
         with(format) {
-            setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
+            setInteger(
+                MediaFormat.KEY_COLOR_FORMAT,
+                MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface
+            )
             setInteger(MediaFormat.KEY_BIT_RATE, bitrate)
             setInteger(MediaFormat.KEY_FRAME_RATE, FRAME_RATE.toInt())
             setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, IFRAME_INTERVAL.toInt())
@@ -290,7 +286,7 @@ class VideoCreate(
 
         const val OUTPUT_MIME_TYPE = "video/avc"
         const val FRAME_RATE = 30L // 30fps
-        const val IFRAME_INTERVAL = 30L
+        const val IFRAME_INTERVAL = 10L
         const val ONE_BILLION = 1_000_000_000L
         const val FRAME_COUNT = FRAME_RATE * 60
 

@@ -59,11 +59,11 @@ fun MediaFormat.mimeType(): String {
 }
 
 fun MediaFormat.isVideoFormat(): Boolean {
-    return mimeType().startsWith("video")
+    return mimeType().startsWith("video/")
 }
 
 fun MediaFormat.isAudioFormat(): Boolean {
-    return mimeType().startsWith("audio")
+    return mimeType().startsWith("audio/")
 }
 
 fun MediaCodec.inputBufferAt(index: Int): ByteBuffer? {

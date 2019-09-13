@@ -2,15 +2,10 @@ package com.seanghay.studioexample
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Matrix
 import android.media.ExifInterface
-import android.media.ExifInterface.*
 import android.opengl.GLES20.*
 import android.opengl.GLUtils
-import android.util.SparseArray
-import android.util.SparseIntArray
-import androidx.core.util.set
-import com.seanghay.studio.gles.graphics.Matrix4f
+import android.opengl.Matrix
 import com.seanghay.studio.gles.graphics.mat4
 import com.seanghay.studio.gles.graphics.texture.Texture2d
 import com.seanghay.studio.gles.transition.*
@@ -45,7 +40,10 @@ class ImageRender(
     )
 
 
-    private val shaders = transitions.map { TransitionalTextureShader(it).also { t -> t.isFlipVertical = true } }
+    private val shaders = transitions.map { TransitionalTextureShader(it).also { v ->
+        v.isFlipVertical = true
+        v.isFlipHorizontal = true
+    } }
     private val images = files.filter { it.name.endsWith(".jpg") }
     private val textures = images.mapIndexed { index, file ->
 
@@ -59,8 +57,8 @@ class ImageRender(
     }
 
     private var currentSlide = 0
-
-
+    
+    private val viewProjectMatrix =  FloatArray(16)
 
     init {
         textureShader.setResolution(width.toFloat(), height.toFloat())
@@ -70,12 +68,21 @@ class ImageRender(
             it.setResolution(width.toFloat(), height.toFloat())
             it.setup()
         }
+
+        val ratio = (width.toFloat() / height.toFloat())
+        val projectionMatrix = FloatArray(16)
+        val viewMatrix = FloatArray(16)
+
+        Matrix.frustumM(projectionMatrix, 0, -ratio, ratio, -1f, 1f, 3f, 7f)
+        Matrix.setLookAtM(viewMatrix, 0, 0f, 0f, -3f, 0f, 0f, 0f, 0f, 1.0f, 0.0f)
+        Matrix.multiplyMM(viewProjectMatrix, 0, projectionMatrix, 0, viewMatrix, 0)
+
     }
 
     private fun bitmapOf(file: File): Bitmap {
-        val b =  BitmapFactory.decodeFile(file.path)
-        val rotationInDegrees = exifToDegrees(getRotationOf(file.path))
-        val matrix = Matrix()
+        val b = BitmapFactory.decodeFile(file.path)
+        val rotationInDegrees = exifToDegrees(Companion.getRotationOf(file.path))
+        val matrix = android.graphics.Matrix()
         if (rotationInDegrees != 0) {
             matrix.preRotate(rotationInDegrees.toFloat())
         }
@@ -83,16 +90,12 @@ class ImageRender(
         return Bitmap.createBitmap(b, 0, 0, b.width, b.height, matrix, true)
     }
 
+
+
     private fun swapTexture() {
         textureShader = shaders.random()
         currentSlide++
-
-//        val currentIndex = currentSlide % images.size
-//        // val nextIndex = (currentSlide + 1) % images.size
-//
-//        val matrix = mat4()
-//        textureShader.mvpMatrix = matrix
-//
+        textureShader.mvpMatrix.elements = viewProjectMatrix
     }
 
     private fun next(): Texture2d {
@@ -115,19 +118,17 @@ class ImageRender(
     }
 
 
-    fun getRotationOf(path: String): Int {
-        val exifInterface = ExifInterface(path)
-        return exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+    private fun exifToDegrees(exifOrientation: Int): Int = when (exifOrientation) {
+        ExifInterface.ORIENTATION_ROTATE_90 -> 90
+        ExifInterface.ORIENTATION_ROTATE_180 -> 180
+        ExifInterface.ORIENTATION_ROTATE_270 -> 270
+        else -> 0
     }
 
-    private fun exifToDegrees(exifOrientation: Int): Int {
-        if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
-            return 90
-        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {
-            return 180
-        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {
-            return 270
+    companion object {
+        private fun getRotationOf(path: String): Int {
+            val exifInterface = ExifInterface(path)
+            return exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
         }
-        return 0
     }
 }
