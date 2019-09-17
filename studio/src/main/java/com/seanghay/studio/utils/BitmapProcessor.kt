@@ -2,6 +2,7 @@ package com.seanghay.studio.utils
 
 import android.graphics.*
 import android.media.ExifInterface
+import com.seanghay.studio.utils.BitmapProcessor.CropType.*
 import java.io.IOException
 
 class BitmapProcessor(private val source: Bitmap) {
@@ -26,33 +27,62 @@ class BitmapProcessor(private val source: Bitmap) {
 
     }
 
+
+
     fun crop(width: Int, height: Int) {
         this.scaledWidth = width
         this.scaledHeight = height
     }
 
+    private fun fillCenterRect(): Rect {
+        val ratio = width.toFloat() / height.toFloat()
+        val bottom = (scaledWidth.toFloat() / ratio).toInt()
+        val top = ((scaledHeight - bottom) / 2f).toInt()
+        return Rect(0, top, scaledWidth, bottom + top)
+    }
+
     fun proceed(): Bitmap {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.color = Color.RED
+
         val bitmap = Bitmap.createBitmap(scaledWidth, scaledHeight, Bitmap.Config.ARGB_8888)
-
-        val sourceRatio = width.toFloat() / height.toFloat()
-        val targetRatio = scaledWidth.toFloat() / scaledHeight.toFloat()
-
         val canvas = Canvas(bitmap)
-        val srcRect = Rect(0, 0, width, height)
+        val cropType = FILL_CENTER
 
-        var left = (scaledWidth - width) / 2
-        var right = left + width
-        var top = (scaledHeight - height) / 2
-        var bottom = top + height
+        var dstRect = Rect(0, 0, scaledWidth, scaledHeight)
 
+        when(cropType) {
+            FIT_CENTER -> dstRect = fitCenterRect()
+            FIT_START ->  dstRect = fitStartRect()
+            FIT_END -> dstRect = fitEndRect()
+            FILL_CENTER -> dstRect = fillCenterRect()
+            FILL_START -> TODO()
+            FILL_END -> TODO()
+        }
 
-        val dstRect = Rect(left, top, right, bottom)
-        canvas.drawBitmap(source, srcRect, dstRect, null)
-
-
+        canvas.drawBitmap(source, null, dstRect, null)
         return bitmap
+    }
+
+    private fun fitEndRect(): Rect {
+        val ratio = width.toFloat() / height.toFloat()
+        val right = (scaledHeight * ratio).toInt()
+        val left = scaledWidth - right
+        return Rect(left , 0, scaledWidth, scaledHeight)
+    }
+
+    private fun fitCenterRect(): Rect {
+        val ratio = width.toFloat() / height.toFloat()
+        val right = (scaledHeight * ratio).toInt()
+        val left = if (scaledWidth > right) ((scaledWidth - right) / 2f).toInt()
+        else ((right - scaledWidth) / 2f).toInt()
+        return Rect(left, 0, right + left, scaledHeight)
+    }
+
+    private fun fitStartRect(): Rect {
+        val ratio = width.toFloat() / height.toFloat()
+        val right = (scaledHeight * ratio).toInt()
+        return Rect(0, 0, right, scaledHeight)
     }
 
     enum class CropType {
