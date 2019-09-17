@@ -1,9 +1,10 @@
 package com.seanghay.studioexample
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.SurfaceTexture
+import android.graphics.*
+import android.opengl.GLES20
 import android.opengl.GLES20.*
+import android.opengl.GLUtils
 import android.opengl.Matrix
 import android.view.TextureView
 import com.seanghay.studio.core.StudioDrawable
@@ -15,6 +16,7 @@ import com.seanghay.studio.gles.graphics.mat4
 import com.seanghay.studio.gles.graphics.texture.Texture2d
 import com.seanghay.studio.gles.kenburns.Kenburns
 import com.seanghay.studio.gles.kenburns.SimpleKenburns
+import com.seanghay.studio.gles.shader.TextureShader
 import com.seanghay.studio.gles.transition.TransitionStore
 import com.seanghay.studio.gles.transition.TransitionalTextureShader
 import com.seanghay.studio.utils.BitmapProcessor
@@ -39,16 +41,21 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     private val blankTexture = Texture2d()
     private var durations = longArrayOf()
 
+    var watermarkBitmap = watermarkBitmap()
+
+    private val watermarkShader = TextureShader()
+    private val watermarkTexture = Texture2d()
+
     private var mvpMatrix = mat4()
     private val kenburnsMatrix = mat4()
 
     var progress: Float = 0f
     var totalDuration = 0L
 
+
     fun getTransitions() = transitions
 
     fun getScenes(): List<Scene> = scenes
-
 
     fun insertScenes(vararg bitmaps: Bitmap) {
         for (bitmap in bitmaps) {
@@ -75,6 +82,14 @@ class VideoComposer(private val context: Context) : StudioDrawable {
 
         blankTexture.initialize()
         blankTexture.configure(GL_TEXTURE_2D)
+
+        watermarkShader.setup()
+        watermarkTexture.initialize()
+        watermarkTexture.use(GL_TEXTURE_2D) {
+            watermarkTexture.configure(GL_TEXTURE_2D)
+            GLUtils.texImage2D(GL_TEXTURE_2D, 0, watermarkBitmap, 0)
+        }
+
 
         preDraw {
             if (width != -1 && height != -1) {
@@ -185,6 +200,9 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         textureShader.progress = interpolatedOffset
         textureShader.draw(currentTexture, nextTexture)
 
+        watermarkShader.mvpMatrix = mvpMatrix
+        watermarkShader.draw(watermarkTexture)
+
         try {
             run(postDrawRunnables)
             Thread.sleep(10)
@@ -243,6 +261,26 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     private fun calculateSeekOffset(index: Int, seekAt: Float): Float {
         val last = durations.getOrElse(index - 1) { 0L }
         return (seekAt - last) / scenes[index].duration.toFloat()
+    }
+
+    private fun watermarkBitmap(): Bitmap {
+        val margin = 20
+        val w = 720
+        val h = 405
+
+        val icon = BitmapFactory.decodeResource(context.resources, R.drawable.togness)
+        val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+
+        val iconRatio = icon.width.toFloat() / icon.height.toFloat()
+        val dstWidth = (w.toFloat() / 5f).toInt()
+        val dstHeight = (dstWidth / iconRatio).toInt()
+
+        val left = w - dstWidth
+        val top = h - dstHeight
+        val dstRect = Rect(left - margin, top - margin, w - margin, h - margin)
+        canvas.drawBitmap(icon, null, dstRect, null)
+        return bitmap
     }
 
 }

@@ -1,6 +1,7 @@
 package com.seanghay.studioexample
 
 import android.animation.TimeAnimator
+import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
@@ -46,7 +47,6 @@ class MainActivity : AppCompatActivity() {
     private val isLoading = MutableLiveData<Boolean>()
     private lateinit var compressor: Compressor
     private lateinit var composer: VideoComposer
-
     private val transitionAdapter: TransitionsAdapter = TransitionsAdapter(arrayListOf())
 
 
@@ -124,7 +124,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onStartTrackingTouch(p0: SeekBar?) {
-
+                timeAnimator.cancel()
             }
 
             override fun onStopTrackingTouch(p0: SeekBar?) {
@@ -161,6 +161,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private lateinit var timeAnimator: ValueAnimator
+
     private fun setEvents() {
         buttonChoose.setOnClickListener { choosePhotos() }
         buttonChooseAudio.setOnClickListener { chooseAudio() }
@@ -168,13 +170,14 @@ class MainActivity : AppCompatActivity() {
         buttonSaveDraft.setOnClickListener { saveDraft() }
         buttonResetDraft.setOnClickListener { resetDraft() }
 
-        val timeAnimator = TimeAnimator.ofInt(0, 10_000)
+
+        timeAnimator = TimeAnimator.ofInt(0, 10_000)
+
         timeAnimator.setDuration(50000)
         timeAnimator.interpolator = LinearInterpolator()
         timeAnimator.addUpdateListener {
             seekBarProgress.progress = (it.animatedFraction * seekBarProgress.max).toInt()
             composer.progress = it.animatedFraction
-
 
         }
 
@@ -183,17 +186,22 @@ class MainActivity : AppCompatActivity() {
 
         imageButtonControl.setOnClickListener {
 
+            if (timeAnimator.isPaused) {
+                timeAnimator.resume()
+                return@setOnClickListener
+            }
+
             if (!timeAnimator.isStarted) {
                 timeAnimator.start()
+                return@setOnClickListener
             }
 
             if (timeAnimator.isStarted) {
                 timeAnimator.pause()
+                return@setOnClickListener
             }
 
-            if (timeAnimator.isPaused) {
-                timeAnimator.resume()
-            }
+
 
 
         }
