@@ -1,7 +1,5 @@
 package com.seanghay.studio.gles.transition
 
-import com.seanghay.studio.gles.transition.Transition
-
 class CannabisleafTransition : Transition("cannabisleaf", SOURCE, 1000L) {
 
 

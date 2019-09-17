@@ -1,7 +1,5 @@
 package com.seanghay.studio.gles.transition
 
-import com.seanghay.studio.gles.transition.Transition
-
 class BowTieVerticalTransition : Transition("bow-tie-vertical", SOURCE, 1000L) {
 
     companion object {

@@ -1,6 +1,5 @@
 package com.seanghay.studio.gles.transition
 
-import com.seanghay.studio.gles.transition.Transition
 import com.seanghay.studio.gles.graphics.uniform.uniform1i
 
 class PolarFunctionTransition : Transition("polar-function", SOURCE, 1000L) {

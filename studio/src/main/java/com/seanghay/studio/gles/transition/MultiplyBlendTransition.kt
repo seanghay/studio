@@ -1,7 +1,5 @@
 package com.seanghay.studio.gles.transition
 
-import com.seanghay.studio.gles.transition.Transition
-
 class MultiplyBlendTransition : Transition("multiply-blend", SOURCE, 1000L) {
 
 

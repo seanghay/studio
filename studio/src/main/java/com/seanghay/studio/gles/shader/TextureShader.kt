@@ -82,7 +82,6 @@ open class TextureShader(override var vertexShaderSource: String = VERTEX_SHADER
     }
 
 
-
     open fun draw(texture: Texture) = use {
         positionAttr.use {
             beforeDraw()
@@ -114,7 +113,7 @@ open class TextureShader(override var vertexShaderSource: String = VERTEX_SHADER
         // language=glsl
         const val VERTEX_SHADER = """
             attribute vec4 vPosition; 
-            attribute vec2 vTextureCoordinate; 
+            attribute vec2 vTextureCoordinate;
             
             varying vec2 texCoord;
             

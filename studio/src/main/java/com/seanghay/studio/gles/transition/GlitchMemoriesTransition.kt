@@ -1,7 +1,5 @@
 package com.seanghay.studio.gles.transition
 
-import com.seanghay.studio.gles.transition.Transition
-
 class GlitchMemoriesTransition : Transition("glitch-memories", SOURCE, 1000L) {
 
 

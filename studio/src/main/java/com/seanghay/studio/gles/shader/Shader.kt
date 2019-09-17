@@ -95,8 +95,9 @@ abstract class  Shader {
         program = -1
     }
 
-    open fun release() = glScope {
 
+    open fun release() = glScope {
+        releaseProgram()
     }
 
     fun use(block: () -> Unit) {

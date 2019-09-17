@@ -1,6 +1,5 @@
 package com.seanghay.studio.gles.transition
 
-import com.seanghay.studio.gles.transition.Transition
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 
 class DreamyZoomTransition : Transition("dreamy-zoom", SOURCE, 1000L) {

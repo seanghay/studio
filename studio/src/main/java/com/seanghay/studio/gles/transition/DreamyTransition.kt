@@ -1,7 +1,5 @@
 package com.seanghay.studio.gles.transition
 
-import com.seanghay.studio.gles.transition.Transition
-
 class DreamyTransition : Transition("dreamy", SOURCE, 1000L) {
 
     companion object {

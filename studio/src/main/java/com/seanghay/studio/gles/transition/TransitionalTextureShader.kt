@@ -25,7 +25,6 @@ open class TransitionalTextureShader(var transition: Transition) : TextureShader
         }
     }
 
-
     override fun beforeDrawVertices() {
         super.beforeDrawVertices()
 
@@ -33,11 +32,11 @@ open class TransitionalTextureShader(var transition: Transition) : TextureShader
         progressUniform.setValue(progress)
         textureFromUniform.setValue(1)
         textureToUniform.setValue(2)
-
     }
 
+
     // Don't forget to use the program
-    fun draw(tex1: Texture, tex2: Texture) = use {
+    open fun draw(tex1: Texture, tex2: Texture) = use {
 
         while (runOnPreDraw.isNotEmpty()) {
             runOnPreDraw.poll()?.run()
@@ -53,11 +52,10 @@ open class TransitionalTextureShader(var transition: Transition) : TextureShader
                     tex2.use(GL_TEXTURE_2D) {
 
                         writeUniforms()
-                         beforeDrawVertices()
+                        beforeDrawVertices()
 
                         drawArrays()
                         afterDrawVertices()
-
                     }
                 }
             }
@@ -66,7 +64,7 @@ open class TransitionalTextureShader(var transition: Transition) : TextureShader
         }
     }
 
-    private infix fun String.mergeWith(b: String): String {
+    private inline infix fun String.mergeWith(b: String): String {
         return "$this\n$b"
     }
 

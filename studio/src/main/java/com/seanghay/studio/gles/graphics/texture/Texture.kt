@@ -35,6 +35,12 @@ open class Texture(var id: Int = NO_TEXTURE) {
         disable(textureTarget)
     }
 
+    fun release() {
+        if (id == NO_TEXTURE) return
+        val args = intArrayOf(id)
+        GLES20.glDeleteTextures(1,  args, 0)
+    }
+
     companion object {
         const val NO_TEXTURE = -1
     }

@@ -1,7 +1,6 @@
 package com.seanghay.studio.gles.transition
 
 import android.content.Context
-import com.seanghay.studio.gles.transition.Transition
 
 class AssetTransition(
     private val context: Context,

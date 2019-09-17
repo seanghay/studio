@@ -1,7 +1,5 @@
 package com.seanghay.studio.gles.transition
 
-import com.seanghay.studio.gles.transition.Transition
-
 class CrosswarpTransition : Transition("crosswarp", SOURCE, 2000) {
     companion object {
         // language=glsl

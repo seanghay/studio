@@ -50,6 +50,7 @@ class StudioRenderThread(private val surfaceTexture: SurfaceTexture): Thread() {
             if (drawFrame())
                 swapBuffers()
         }
+
         release()
     }
 
