@@ -81,7 +81,7 @@ class ImageRender(
 
     private fun bitmapOf(file: File): Bitmap {
         val b = BitmapFactory.decodeFile(file.path)
-        val rotationInDegrees = exifToDegrees(Companion.getRotationOf(file.path))
+        val rotationInDegrees = exifToDegrees(getRotationOf(file.path))
         val matrix = android.graphics.Matrix()
         if (rotationInDegrees != 0) {
             matrix.preRotate(rotationInDegrees.toFloat())
@@ -116,7 +116,6 @@ class ImageRender(
         glViewport(0, 0, width, height)
         textureShader.draw(current(), next())
     }
-
 
     private fun exifToDegrees(exifOrientation: Int): Int = when (exifOrientation) {
         ExifInterface.ORIENTATION_ROTATE_90 -> 90

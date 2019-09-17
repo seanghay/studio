@@ -11,7 +11,6 @@ import com.seanghay.studio.gles.egl.EglWindowSurface
 
 class StudioRenderThread(private val surfaceTexture: SurfaceTexture): Thread() {
 
-
     private val eglCore = EglCore()
     private lateinit var windowSurface: EglWindowSurface
     private var isRunning = true
@@ -44,6 +43,8 @@ class StudioRenderThread(private val surfaceTexture: SurfaceTexture): Thread() {
 
     override fun run() {
         setup()
+        makeCurrent()
+        drawable?.onSetup()
         while (isRunning && !interrupted()) {
             makeCurrent()
             if (drawFrame())

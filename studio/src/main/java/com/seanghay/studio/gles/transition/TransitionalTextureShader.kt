@@ -37,7 +37,7 @@ open class TransitionalTextureShader(var transition: Transition) : TextureShader
 
     }
 
-    // Dont forget to use the program
+    // Don't forget to use the program
     fun draw(tex1: Texture, tex2: Texture) = use {
 
         while (runOnPreDraw.isNotEmpty()) {
@@ -84,7 +84,6 @@ open class TransitionalTextureShader(var transition: Transition) : TextureShader
             uniform float ratio;
 
             varying vec2 texCoord;
-            
             
             vec4 getFromColor(vec2 uv) {
                 return texture2D(texture, uv);

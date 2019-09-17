@@ -3,13 +3,13 @@ package com.seanghay.studioexample
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.OpenableColumns
-import android.view.TextureView
 import android.view.View
 import android.widget.SeekBar
 import android.widget.Toast
@@ -18,6 +18,7 @@ import androidx.core.text.HtmlCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.room.Room
+import com.seanghay.studio.utils.BitmapProcessor
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
 import com.zhihu.matisse.engine.impl.PicassoEngine
@@ -78,14 +79,13 @@ class MainActivity : AppCompatActivity() {
     private fun initProgress() {
         seekBarProgress.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
-                textViewProgress.text =
-                    HtmlCompat.fromHtml(
+                textViewProgress.text = HtmlCompat.fromHtml(
                         "Progress: <strong>$p1%</strong>",
                         HtmlCompat.FROM_HTML_MODE_LEGACY
-                    )
+                )
 
                 val progress  = p1.toFloat() / p0!!.max.toFloat()
-                composer.shade = progress
+                composer.progress = progress
             }
 
             override fun onStartTrackingTouch(p0: SeekBar?) {
@@ -109,6 +109,9 @@ class MainActivity : AppCompatActivity() {
             it.adapter = slideAdapter
             it.setHasFixedSize(true)
         }
+
+        val bitmaps = slides.map { BitmapProcessor.load(it.path) }.toTypedArray()
+        composer.insertScenes(*bitmaps)
     }
 
     private fun setEvents() {
