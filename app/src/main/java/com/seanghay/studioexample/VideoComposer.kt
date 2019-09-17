@@ -46,6 +46,10 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     private val watermarkShader = TextureShader()
     private val watermarkTexture = Texture2d()
 
+
+    private val quoteShader = TextureShader()
+    private val quoteTexture = Texture2d()
+
     private var mvpMatrix = mat4()
     private val kenburnsMatrix = mat4()
 
@@ -88,6 +92,16 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         watermarkTexture.use(GL_TEXTURE_2D) {
             watermarkTexture.configure(GL_TEXTURE_2D)
             GLUtils.texImage2D(GL_TEXTURE_2D, 0, watermarkBitmap, 0)
+        }
+
+
+        val quoteBitmap = TextBitmap.quoteBitmap(context, "ខ្ញុំបានមើលព្យុះ ដែលមានភាពស្រស់ស្អាតណាស់ ប៉ុន្តែគួរឲ្យខ្លាច")
+
+        quoteShader.setup()
+        quoteTexture.initialize()
+        quoteTexture.use(GL_TEXTURE_2D) {
+            quoteTexture.configure(GL_TEXTURE_2D)
+            GLUtils.texImage2D(GL_TEXTURE_2D, 0, quoteBitmap, 0)
         }
 
 
@@ -202,6 +216,9 @@ class VideoComposer(private val context: Context) : StudioDrawable {
 
         watermarkShader.mvpMatrix = mvpMatrix
         watermarkShader.draw(watermarkTexture)
+
+        quoteShader.mvpMatrix = mvpMatrix
+        quoteShader.draw(quoteTexture)
 
         try {
             run(postDrawRunnables)

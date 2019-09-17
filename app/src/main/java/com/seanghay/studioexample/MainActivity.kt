@@ -200,10 +200,6 @@ class MainActivity : AppCompatActivity() {
                 timeAnimator.pause()
                 return@setOnClickListener
             }
-
-
-
-
         }
     }
 
