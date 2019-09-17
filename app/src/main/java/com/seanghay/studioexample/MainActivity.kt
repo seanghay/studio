@@ -1,5 +1,6 @@
 package com.seanghay.studioexample
 
+import android.animation.TimeAnimator
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
@@ -11,6 +12,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.view.View
+import android.view.animation.LinearInterpolator
 import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.Toast
@@ -117,6 +119,7 @@ class MainActivity : AppCompatActivity() {
                 )
 
                 val progress  = p1.toFloat() / p0!!.max.toFloat()
+                if (p2)
                 composer.progress = progress
             }
 
@@ -164,6 +167,36 @@ class MainActivity : AppCompatActivity() {
         buttonExport.setOnClickListener { exportAsVideoFile() }
         buttonSaveDraft.setOnClickListener { saveDraft() }
         buttonResetDraft.setOnClickListener { resetDraft() }
+
+        val timeAnimator = TimeAnimator.ofInt(0, 10_000)
+        timeAnimator.setDuration(50000)
+        timeAnimator.interpolator = LinearInterpolator()
+        timeAnimator.addUpdateListener {
+            seekBarProgress.progress = (it.animatedFraction * seekBarProgress.max).toInt()
+            composer.progress = it.animatedFraction
+
+
+        }
+
+        timeAnimator.repeatMode = TimeAnimator.RESTART
+        timeAnimator.repeatCount = TimeAnimator.INFINITE
+
+        imageButtonControl.setOnClickListener {
+
+            if (!timeAnimator.isStarted) {
+                timeAnimator.start()
+            }
+
+            if (timeAnimator.isStarted) {
+                timeAnimator.pause()
+            }
+
+            if (timeAnimator.isPaused) {
+                timeAnimator.resume()
+            }
+
+
+        }
     }
 
     private fun resetDraft() {
