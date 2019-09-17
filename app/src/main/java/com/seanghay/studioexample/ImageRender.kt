@@ -39,7 +39,6 @@ class ImageRender(
         WipeRightTransition()
     )
 
-
     private val shaders = transitions.map { TransitionalTextureShader(it).also { v ->
         v.isFlipVertical = true
         v.isFlipHorizontal = true
@@ -78,6 +77,8 @@ class ImageRender(
         Matrix.multiplyMM(viewProjectMatrix, 0, projectionMatrix, 0, viewMatrix, 0)
 
     }
+
+
 
     private fun bitmapOf(file: File): Bitmap {
         val b = BitmapFactory.decodeFile(file.path)

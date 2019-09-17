@@ -3,8 +3,7 @@ package com.seanghay.studio.gles.transition
 import com.seanghay.studio.gles.transition.Transition
 
 class FadeTransition(name: String, duration: Long) : Transition(
-    name,
-    SOURCE, duration
+    name, SOURCE, duration
 ) {
 
     companion object {

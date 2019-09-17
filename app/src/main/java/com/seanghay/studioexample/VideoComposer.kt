@@ -11,9 +11,7 @@ import com.seanghay.studio.core.StudioRenderThread
 import com.seanghay.studio.gles.annotation.GlContext
 import com.seanghay.studio.gles.egl.glScope
 import com.seanghay.studio.gles.graphics.texture.Texture2d
-import com.seanghay.studio.gles.transition.FadeTransition
-import com.seanghay.studio.gles.transition.Transition
-import com.seanghay.studio.gles.transition.TransitionalTextureShader
+import com.seanghay.studio.gles.transition.*
 import com.seanghay.studio.utils.BitmapProcessor
 import java.util.*
 import kotlin.math.max
@@ -23,7 +21,7 @@ import kotlin.math.min
 class Scene(var bitmap: Bitmap) {
 
     var duration: Long = 4000L
-    var transition = FadeTransition("fade", 1000L)
+    var transition: Transition = FadeTransition("fade", 1000L)
     var texture: Texture2d = Texture2d()
 
     @GlContext
@@ -48,15 +46,83 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     private var width: Int = -1
     private var height: Int = -1
 
+    private val transitions = arrayListOf(
+        FadeTransition("fade", 1000L),
+        AngularTransition(),
+        BounceTransition(),
+        BowTieHorizontalTransition(),
+        BowTieVerticalTransition(),
+        BurnTransition(),
+        ButterflyWaveScrawlerTransition(),
+        CannabisleafTransition(),
+        CircleCropTransition(),
+        CircleTransition(),
+        CircleopenTransition(),
+        ColorphaseTransition(),
+        ColourDistanceTransition(),
+        CrazyParametricFunTransition(),
+        CrossZoomTransition(),
+        CrosshatchTransition(),
+        CrosswarpTransition(),
+        CubeTransition(),
+        DirectionalTransition(),
+        DirectionalwarpTransition(),
+        DirectionalwipeTransition(),
+        DoomScreenTransitionTransition(),
+        DoorwayTransition(),
+        DreamyTransition(),
+        DreamyZoomTransition(),
+        FadecolorTransition(),
+        FadegrayscaleTransition(),
+        FlyeyeTransition(),
+        GlitchDisplaceTransition(),
+        GlitchMemoriesTransition(),
+        HeartTransition(),
+        HexagonalizeTransition(),
+        InvertedPageCurlTransition(),
+        KaleidoscopeTransition(),
+        LinearBlurTransition(),
+        LuminanceMeltTransition(),
+        MorphTransition(),
+        MosaicTransition(),
+        MultiplyBlendTransition(),
+        PerlinTransition(),
+        PinwheelTransition(),
+        PolarFunctionTransition(),
+        PolkaDotsCurtainTransition(),
+        RadialTransition(),
+        RippleTransition(),
+        RotateScaleFadeTransition(),
+        SimpleZoomTransition(),
+        SqueezeTransition(),
+        StereoViewerTransition(),
+        SwapTransition(),
+        SwirlTransition(),
+        UndulatingBurnOutTransition(),
+        WaterDropTransition(),
+        WindTransition(),
+        WindowblindsTransition(),
+        WindowsliceTransition(),
+        WipeDownTransition(),
+        WipeLeftTransition(),
+        WipeRightTransition(),
+        WipeUpTransition(),
+        ZoomInCirclesTransition()
+    )
+
     private val defaultTransition: Transition = FadeTransition("fade", 1000L)
     private val scenes = mutableListOf<Scene>()
     private val preDrawRunnables: Queue<Runnable> = LinkedList()
-    private val textureShader = TransitionalTextureShader(defaultTransition)
+    private val textureShaders = transitions.associate { it.name to TransitionalTextureShader(it) }
     private val blankTexture = Texture2d()
     private var durations = longArrayOf()
 
     var progress: Float = 0f
     var totalDuration = 0L
+
+    fun getTransitions() = transitions
+
+    fun getScenes(): List<Scene> = scenes
 
     fun insertScenes(vararg bitmaps: Bitmap) {
         for (bitmap in bitmaps) {
@@ -76,8 +142,11 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     }
 
     override fun onSetup() {
-        textureShader.isFlipVertical = true
-        textureShader.setup()
+        textureShaders.forEach {
+            it.value.isFlipVertical = true
+            it.value.setup()
+        }
+
         blankTexture.initialize()
         blankTexture.configure(GL_TEXTURE_2D)
     }
@@ -169,6 +238,8 @@ class VideoComposer(private val context: Context) : StudioDrawable {
 
         val currentTexture = currentScene.texture
         val nextTexture = scenes.getOrNull(seekIndex + 1)?.texture ?: blankTexture
+
+        val textureShader = textureShaders[currentScene.transition.name] ?: return false
         textureShader.progress = interpolateOffset(currentScene, offset)
         textureShader.draw(currentTexture, nextTexture)
 

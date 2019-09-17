@@ -11,13 +11,17 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.HtmlCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.room.Room
+import com.seanghay.studio.gles.transition.*
 import com.seanghay.studio.utils.BitmapProcessor
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
@@ -41,6 +45,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var compressor: Compressor
     private lateinit var composer: VideoComposer
 
+    private val transitionAdapter: TransitionsAdapter = TransitionsAdapter(arrayListOf())
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         composer = VideoComposer(this)
@@ -58,12 +65,37 @@ class MainActivity : AppCompatActivity() {
             loadingLayout.visibility = if (it) View.VISIBLE else View.GONE
         })
 
+        initTransitions()
         setEvents()
         initPhotos()
         initAudio()
         initProgress()
-        isLoading.value = false
         initRendering()
+        isLoading.value = false
+
+    }
+
+    private fun initTransitions() {
+        val transitions = composer.getTransitions()
+        val layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        transitionAdapter.items = transitions
+
+        recyclerViewTransitions.let {
+            it.adapter = transitionAdapter
+            it.layoutManager = layoutManager
+            it.setHasFixedSize(true)
+            (it.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+        }
+
+        transitionAdapter.selectionChange = {
+            val transition = transitions[transitionAdapter.selectedAt]
+            val scene = composer.getScenes().getOrNull(slideAdapter.selectedAt)
+            if (scene != null) {
+                scene.transition = transition
+                recyclerViewTransitions.smoothScrollToPosition(transitionAdapter.selectedAt)
+            }
+        }
+
     }
 
     private fun initRendering() {
@@ -108,10 +140,22 @@ class MainActivity : AppCompatActivity() {
         recyclerView.let {
             it.adapter = slideAdapter
             it.setHasFixedSize(true)
+            (it.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         }
 
         val bitmaps = slides.map { BitmapProcessor.load(it.path) }.toTypedArray()
         composer.insertScenes(*bitmaps)
+
+        slideAdapter.selectionChange = {
+            val sceneIndex = slideAdapter.selectedAt
+            val transition =  composer.getScenes().get(sceneIndex).transition
+            val selectedTransition = composer.getTransitions().firstOrNull { it.name == transition.name }
+            if (selectedTransition != null) {
+                val indexOf = composer.getTransitions().indexOf(selectedTransition)
+                transitionAdapter.select(indexOf)
+                recyclerViewTransitions.smoothScrollToPosition(indexOf)
+            }
+        }
     }
 
     private fun setEvents() {

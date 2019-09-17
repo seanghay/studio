@@ -9,7 +9,6 @@ import java.util.*
 
 open class TransitionalTextureShader(var transition: Transition) : TextureShader() {
 
-
     override var fragmentShaderSource: String = FRAGMENT_SHADER mergeWith transition.source
 
     var progress = 0f

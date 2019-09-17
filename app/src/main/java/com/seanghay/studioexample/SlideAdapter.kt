@@ -10,6 +10,23 @@ import java.io.File
 
 class SlideAdapter(var items: List<SlideEntity>) : RecyclerView.Adapter<SlideAdapter.SlideViewHolder>() {
 
+    var selectionChange: () -> Unit = {}
+
+    var selectedAt = -1
+        set(value) {
+            field = value
+            selectionChange()
+        }
+
+
+    fun select(at: Int) {
+        if (at == selectedAt) return
+        notifyItemChanged(selectedAt)
+        selectedAt = at
+        notifyItemChanged(selectedAt)
+    }
+
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SlideViewHolder {
         return SlideViewHolder(LayoutInflater.from(parent.context).inflate(viewType, parent, false))
     }
@@ -27,12 +44,22 @@ class SlideAdapter(var items: List<SlideEntity>) : RecyclerView.Adapter<SlideAda
     }
 
     inner class SlideViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+
+        init {
+            itemView.setOnClickListener {
+                select(adapterPosition)
+            }
+        }
+
         fun bind(item: SlideEntity) {
+            itemView.isSelected = selectedAt == adapterPosition
             Picasso.with(itemView.context)
                 .load(File(item.path))
                 .fit()
                 .centerCrop()
                 .into(itemView.imageView)
+
+            itemView.imageView.alpha = if (itemView.isSelected) 1f else .7f
         }
     }
 }
