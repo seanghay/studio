@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:orientation="vertical">
+
+    <com.google.android.material.appbar.AppBarLayout
+            android:stateListAnimator="@animator/appbar"
+            android:theme="@style/ThemeOverlay.MaterialComponents.Light"
+            android:backgroundTint="?colorSurface"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.MaterialToolbar
+                app:title="Filters"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize">
+
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_gravity="end"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent">
+
+
+                <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonReset"
+                        android:text="Reset"
+                        android:textColor="#AA2E4A"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="16dp"
+                        style="@style/MyButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+
+                <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonSave"
+                        android:text="Save"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="16dp"
+                        style="@style/MyButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+        </com.google.android.material.appbar.MaterialToolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+
+
+    <androidx.core.widget.NestedScrollView
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                    android:tag="brightness"
+                    android:text="Brightness"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <androidx.appcompat.widget.AppCompatSeekBar
+                    android:id="@+id/brightness"
+                    android:layout_margin="16dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                    android:tag="contrast"
+                    android:text="Contrast"
+                    android:layout_marginStart="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+
+            <androidx.appcompat.widget.AppCompatSeekBar
+                    android:id="@+id/contrast"
+                    android:layout_margin="16dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                    android:tag="saturation"
+                    android:text="Saturation"
+                    android:layout_marginStart="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+
+            <androidx.appcompat.widget.AppCompatSeekBar
+                    android:id="@+id/saturation"
+                    android:layout_margin="16dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                    android:tag="tint"
+                    android:text="Tint"
+                    android:layout_marginStart="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <androidx.appcompat.widget.AppCompatSeekBar
+                    android:id="@+id/tint"
+                    android:layout_margin="16dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                    android:tag="gamma"
+                    android:text="Gamma"
+                    android:layout_marginStart="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <androidx.appcompat.widget.AppCompatSeekBar
+                    android:id="@+id/gamma"
+                    android:layout_margin="16dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                    android:tag="warmth"
+                    android:text="Warmth"
+                    android:layout_marginStart="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+
+            <androidx.appcompat.widget.AppCompatSeekBar
+                    android:id="@+id/warmth"
+                    android:layout_margin="16dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                    android:tag="vibrant"
+                    android:text="Vibrant"
+                    android:layout_marginStart="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <androidx.appcompat.widget.AppCompatSeekBar
+                    android:id="@+id/vibrant"
+                    android:layout_margin="16dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                    android:tag="sepia"
+                    android:text="Sepia"
+                    android:layout_marginStart="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <androidx.appcompat.widget.AppCompatSeekBar
+                    android:id="@+id/sepia"
+                    android:layout_margin="16dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                    android:tag="intensity"
+                    android:text="Intensity"
+                    android:layout_marginStart="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+
+            <androidx.appcompat.widget.AppCompatSeekBar
+                    android:id="@+id/intensity"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="32dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

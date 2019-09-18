@@ -7,6 +7,27 @@
         android:fitsSystemWindows="true"
         tools:context=".MainActivity">
 
+    <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="?colorSurface"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                android:theme="@style/ThemeOverlay.MaterialComponents.Toolbar.Surface"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:title="Studio">
+
+        </com.google.android.material.appbar.MaterialToolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
     <TextureView
             android:id="@+id/textureView"
             android:layout_width="0dp"
@@ -14,7 +35,7 @@
             app:layout_constraintDimensionRatio="H,16:9"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/appBarLayout" />
 
 
     <androidx.appcompat.widget.AppCompatSeekBar
@@ -93,11 +114,11 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="4dp"
+            android:ellipsize="middle"
+            android:singleLine="true"
             android:text="Audio name: (None)"
             android:textColor="@color/text"
             android:textSize="12sp"
-            android:singleLine="true"
-            android:ellipsize="middle"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/textViewDuration" />
@@ -147,11 +168,11 @@
 
         <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewTransitions"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                android:orientation="horizontal"
-                tools:listitem="@layout/item_transition"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_transition" />
 
 
     </com.google.android.material.card.MaterialCardView>
@@ -175,7 +196,6 @@
             android:text="Reset Draft"
             app:layout_constraintEnd_toStartOf="@id/buttonSaveDraft"
             app:layout_constraintTop_toBottomOf="@id/cardViewInfo" />
-
 
     <FrameLayout
             android:id="@+id/loadingLayout"

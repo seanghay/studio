@@ -64,6 +64,7 @@ object TextBitmap {
             .setJustificationMode(justificationMode)
             .build()
 
+
         save()
         translate(x, y)
         staticLayout.draw(this)

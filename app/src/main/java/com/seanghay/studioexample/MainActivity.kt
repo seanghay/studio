@@ -5,16 +5,16 @@ import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.OpenableColumns
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.animation.LinearInterpolator
-import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -24,8 +24,9 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.room.Room
-import com.seanghay.studio.gles.transition.*
+import com.seanghay.studio.gles.shader.filter.pack.PackFilter
 import com.seanghay.studio.utils.BitmapProcessor
+import com.seanghay.studioexample.bottomsheet.FilterPackDialogFragment
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
 import com.zhihu.matisse.engine.impl.PicassoEngine
@@ -36,7 +37,9 @@ import java.io.File
 import java.io.FileOutputStream
 import java.util.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackListener {
+
+
 
     private val slides = arrayListOf<SlideEntity>()
     private val slideAdapter: SlideAdapter = SlideAdapter(slides)
@@ -48,7 +51,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var compressor: Compressor
     private lateinit var composer: VideoComposer
     private val transitionAdapter: TransitionsAdapter = TransitionsAdapter(arrayListOf())
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,11 +64,12 @@ class MainActivity : AppCompatActivity() {
         setupStatusBar(Color.parseColor("#80FFFFFF"))
         setLightStatusBar(true)
         setContentView(R.layout.activity_main)
+
         isLoading.value = true
         isLoading.observe(this, Observer {
             loadingLayout.visibility = if (it) View.VISIBLE else View.GONE
         })
-
+        initToolbar()
         initTransitions()
         setEvents()
         initPhotos()
@@ -74,7 +77,28 @@ class MainActivity : AppCompatActivity() {
         initProgress()
         initRendering()
         isLoading.value = false
+    }
 
+    override fun onFilterPackSaved(filterPack: PackFilter) {
+        composer.applyFilterPack(filterPack.copy())
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.filter) {
+            FilterPackDialogFragment.newInstance(composer.getCurrentFilterPack())
+                .show(supportFragmentManager, "filters")
+        }
+
+        return super.onOptionsItemSelected(item)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    private fun initToolbar() {
+        setSupportActionBar(toolbar)
     }
 
     private fun initTransitions() {
@@ -114,13 +138,13 @@ class MainActivity : AppCompatActivity() {
         seekBarProgress.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
                 textViewProgress.text = HtmlCompat.fromHtml(
-                        "Progress: <strong>$p1%</strong>",
-                        HtmlCompat.FROM_HTML_MODE_LEGACY
+                    "Progress: <strong>$p1%</strong>",
+                    HtmlCompat.FROM_HTML_MODE_LEGACY
                 )
 
-                val progress  = p1.toFloat() / p0!!.max.toFloat()
+                val progress = p1.toFloat() / p0!!.max.toFloat()
                 if (p2)
-                composer.progress = progress
+                    composer.progress = progress
             }
 
             override fun onStartTrackingTouch(p0: SeekBar?) {
@@ -151,8 +175,9 @@ class MainActivity : AppCompatActivity() {
 
         slideAdapter.selectionChange = {
             val sceneIndex = slideAdapter.selectedAt
-            val transition =  composer.getScenes().get(sceneIndex).transition
-            val selectedTransition = composer.getTransitions().firstOrNull { it.name == transition.name }
+            val transition = composer.getScenes().get(sceneIndex).transition
+            val selectedTransition =
+                composer.getTransitions().firstOrNull { it.name == transition.name }
             if (selectedTransition != null) {
                 val indexOf = composer.getTransitions().indexOf(selectedTransition)
                 transitionAdapter.select(indexOf)
@@ -294,6 +319,7 @@ class MainActivity : AppCompatActivity() {
         slideAdapter.notifyDataSetChanged()
     }
 
+
     private fun play(path: String) {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(path))
         intent.setDataAndType(Uri.parse(path), "video/mp4")
@@ -320,6 +346,7 @@ class MainActivity : AppCompatActivity() {
                 else View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         }
     }
+
 }
 
 

@@ -2,7 +2,6 @@ package com.seanghay.studioexample
 
 import android.content.Context
 import android.graphics.*
-import android.opengl.GLES20
 import android.opengl.GLES20.*
 import android.opengl.GLUtils
 import android.opengl.Matrix
@@ -11,12 +10,15 @@ import com.seanghay.studio.core.StudioDrawable
 import com.seanghay.studio.core.StudioRenderThread
 import com.seanghay.studio.gles.annotation.GlContext
 import com.seanghay.studio.gles.egl.glScope
+import com.seanghay.studio.gles.graphics.FrameBuffer
 import com.seanghay.studio.gles.graphics.Matrix4f
 import com.seanghay.studio.gles.graphics.mat4
 import com.seanghay.studio.gles.graphics.texture.Texture2d
 import com.seanghay.studio.gles.kenburns.Kenburns
 import com.seanghay.studio.gles.kenburns.SimpleKenburns
 import com.seanghay.studio.gles.shader.TextureShader
+import com.seanghay.studio.gles.shader.filter.PackFilterShader
+import com.seanghay.studio.gles.shader.filter.pack.PackFilter
 import com.seanghay.studio.gles.transition.TransitionStore
 import com.seanghay.studio.gles.transition.TransitionalTextureShader
 import com.seanghay.studio.utils.BitmapProcessor
@@ -32,11 +34,16 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     private var height: Int = -1
     private var isReleased = false
 
+    // Transitions
     private val transitions = TransitionStore.getAllTransitions()
 
     private val scenes = mutableListOf<Scene>()
+
+    // Threading & Handlers
     private val preDrawRunnables: Queue<Runnable> = LinkedList()
     private val postDrawRunnables: Queue<Runnable> = LinkedList()
+
+    // Texture
     private val textureShaders = transitions.associate { it.name to TransitionalTextureShader(it) }
     private val blankTexture = Texture2d()
     private var durations = longArrayOf()
@@ -46,16 +53,30 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     private val watermarkShader = TextureShader()
     private val watermarkTexture = Texture2d()
 
-
+    // Quotes
     private val quoteShader = TextureShader()
     private val quoteTexture = Texture2d()
 
+    // Kenburns Effect
     private var mvpMatrix = mat4()
     private val kenburnsMatrix = mat4()
 
+
+    private val newMatrix = mat4()
+    private val kenburns: Kenburns = SimpleKenburns(0f, .25f)
+
+    // Progression
     var progress: Float = 0f
     var totalDuration = 0L
 
+    // Filters
+    private val filterShader = PackFilterShader()
+    private var defaultFilterPack = PackFilter()
+
+
+    // FrameBuffers
+    private val filterFrameBuffer: FrameBuffer = FrameBuffer()
+    private val frameBufferMvpMatrix = mat4()
 
     fun getTransitions() = transitions
 
@@ -63,11 +84,14 @@ class VideoComposer(private val context: Context) : StudioDrawable {
 
     fun insertScenes(vararg bitmaps: Bitmap) {
         for (bitmap in bitmaps) {
+
             val bitmapProcessor = BitmapProcessor(bitmap)
             bitmapProcessor.crop(720, 405)
             bitmapProcessor.cropType(BitmapProcessor.CropType.FIT_CENTER)
+
             val scene = Scene(bitmapProcessor.proceed())
             scenes.add(scene)
+
             preDraw { scene.setup() }
             totalDuration += scene.duration
         }
@@ -80,21 +104,68 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     }
 
     override fun onSetup() {
-        textureShaders.forEach {
-            it.value.setup()
-        }
+        textureShaders.forEach { it.value.setup() }
+        setupBlackTexture()
+        setupWatermarkShader()
+        setupQuoteShader()
+        setupFilters()
+        setupFrameBuffer()
 
+        preDraw {
+            if (width != -1 && height != -1) {
+                setMatrices()
+                setFrameBufferMatrices()
+                glScope("SetViewport") {
+                    glViewport(0, 0, width, height)
+                }
+            }
+        }
+    }
+
+    private fun setFrameBufferMatrices() {
+        // Reset Matrix
+        Matrix.setIdentityM(frameBufferMvpMatrix.elements, 0)
+
+        // FrameBuffer texture is upside down, so we have to flip it back to normal
+        // That's kinda sad right?
+        Matrix.scaleM(frameBufferMvpMatrix.elements, 0, 1f, -1f, 1f)
+        Matrix.multiplyMM(frameBufferMvpMatrix.elements, 0, mvpMatrix.elements, 0, frameBufferMvpMatrix.elements, 0)
+    }
+
+    private fun setupFrameBuffer() {
+        filterFrameBuffer.setup(width, height)
+    }
+
+
+    private fun setupFilters() {
+        filterShader.setup()
+        filterShader.applyPackFilter(defaultFilterPack)
+    }
+
+    fun applyFilterPack(filter: PackFilter) {
+        defaultFilterPack = filter
+        filterShader.applyPackFilter(defaultFilterPack)
+    }
+
+    fun getCurrentFilterPack(): PackFilter {
+        return defaultFilterPack
+    }
+
+    private fun setupBlackTexture() {
         blankTexture.initialize()
         blankTexture.configure(GL_TEXTURE_2D)
+    }
 
+    private fun setupWatermarkShader() {
         watermarkShader.setup()
         watermarkTexture.initialize()
         watermarkTexture.use(GL_TEXTURE_2D) {
             watermarkTexture.configure(GL_TEXTURE_2D)
             GLUtils.texImage2D(GL_TEXTURE_2D, 0, watermarkBitmap, 0)
         }
+    }
 
-
+    private fun setupQuoteShader() {
         val quoteBitmap = TextBitmap.quoteBitmap(context, "ខ្ញុំបានមើលព្យុះ ដែលមានភាពស្រស់ស្អាតណាស់ ប៉ុន្តែគួរឲ្យខ្លាច")
 
         quoteShader.setup()
@@ -103,17 +174,6 @@ class VideoComposer(private val context: Context) : StudioDrawable {
             quoteTexture.configure(GL_TEXTURE_2D)
             GLUtils.texImage2D(GL_TEXTURE_2D, 0, quoteBitmap, 0)
         }
-
-
-        preDraw {
-            if (width != -1 && height != -1) {
-                setMatrices()
-                glScope("SetViewport") {
-                    glViewport(0, 0, width, height)
-                }
-            }
-        }
-
     }
 
     private fun setMatrices() {
@@ -186,6 +246,7 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         }
     }
 
+
     override fun onDraw(): Boolean {
         run(preDrawRunnables)
 
@@ -210,9 +271,14 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         val textureShader = textureShaders[currentScene.transition.name] ?: return false
         val interpolatedOffset = interpolateOffset(currentScene, offset).smoothStep(0f, 1f)
         textureShader.mvpMatrix = calculateMvpMatrix(offset, seekIndex)
-
         textureShader.progress = interpolatedOffset
-        textureShader.draw(currentTexture, nextTexture)
+
+        filterFrameBuffer.use {
+            textureShader.draw(currentTexture, nextTexture)
+        }
+
+        filterShader.mvpMatrix = frameBufferMvpMatrix
+        filterShader.draw(filterFrameBuffer.toTexture())
 
         watermarkShader.mvpMatrix = mvpMatrix
         watermarkShader.draw(watermarkTexture)
@@ -229,9 +295,6 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         return true
     }
 
-    private val newMatrix = mat4()
-    private val kenburns: Kenburns = SimpleKenburns(0f, .25f)
-
     private fun calculateMvpMatrix(offset: Float, seekIndex: Int): Matrix4f {
         val f = seekIndex % 2
 
@@ -245,6 +308,8 @@ class VideoComposer(private val context: Context) : StudioDrawable {
 
         return newMatrix
     }
+
+
 
     @Synchronized
     fun release() {
