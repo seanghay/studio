@@ -378,5 +378,13 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         canvas.drawBitmap(icon, null, dstRect, null)
         return bitmap
     }
+    
+    fun applyQuoteBitmap(bitmap: Bitmap) {
+        postDraw {
+            quoteTexture.use(GL_TEXTURE_2D) {
+                GLUtils.texImage2D(GL_TEXTURE_2D, 0, bitmap, 0)
+            }
+        }
+    }
 
 }

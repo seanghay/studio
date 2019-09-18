@@ -28,6 +28,7 @@ import com.seanghay.studio.gles.shader.filter.pack.PackFilter
 import com.seanghay.studio.utils.BitmapProcessor
 import com.seanghay.studioexample.bottomsheet.FilterPackDialogFragment
 import com.seanghay.studioexample.bottomsheet.QuoteDialogFragment
+import com.seanghay.studioexample.sticker.QuoteState
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
 import com.zhihu.matisse.engine.impl.PicassoEngine
@@ -38,8 +39,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.util.*
 
-class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackListener {
-
+class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackListener, QuoteDialogFragment.QuoteListener {
 
 
     private val slides = arrayListOf<SlideEntity>()
@@ -53,8 +53,19 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
     private lateinit var composer: VideoComposer
     private val transitionAdapter: TransitionsAdapter = TransitionsAdapter(arrayListOf())
 
+    private lateinit var quoteState: QuoteState
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        quoteState = QuoteState(
+            text = "Hello, World!",
+            textColor = Color.BLACK,
+            textSize = 18f.dip(resources),
+            scaleFactor = 1f,
+            fontFamily = null
+        )
+
         composer = VideoComposer(this)
         compressor = Compressor(this)
         appDatabase = Room.databaseBuilder(this, AppDatabase::class.java, "app-v1")
@@ -83,6 +94,15 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
 
     }
 
+    override fun newQuoteState(quoteState: QuoteState) {
+        this.quoteState = quoteState
+    }
+
+    override fun onReceiveQuoteBitmap(bitmap: Bitmap) {
+        composer.applyQuoteBitmap(bitmap)
+    }
+
+
     override fun onFilterPackSaved(filterPack: PackFilter) {
         composer.applyFilterPack(filterPack.copy())
     }
@@ -94,7 +114,8 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
         }
 
         if (item.itemId == R.id.quote) {
-            QuoteDialogFragment.newInstance().show(supportFragmentManager, "quote")
+            QuoteDialogFragment.newInstance(quoteState)
+                .show(supportFragmentManager, "quote")
         }
 
         return super.onOptionsItemSelected(item)
