@@ -1,9 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+            android:id="@+id/quote"
+            app:showAsAction="ifRoom"
+            android:icon="@drawable/ic_text_fields_black_24dp"
+            android:title="Quote" />
+
+    <item
+            android:id="@+id/filter_slide"
+            app:showAsAction="ifRoom"
+            android:icon="@drawable/ic_photo_filter_black_24dp"
+            android:title="Slide Filter" />
+
+
     <item
             android:id="@+id/filter"
             app:showAsAction="ifRoom"
             android:icon="@drawable/ic_filter_hdr_black_24dp"
             android:title="Filter" />
+
+
+
+
 </menu>

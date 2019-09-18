@@ -18,6 +18,11 @@
 
         <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
+                app:titleTextColor="@color/colorAccent"
+                app:subtitle="by Togness"
+                app:titleTextAppearance="?textAppearanceBody1"
+                app:subtitleTextAppearance="?textAppearanceCaption"
+                app:subtitleTextColor="#000"
                 android:layout_width="match_parent"
                 android:layout_height="?actionBarSize"
                 android:theme="@style/ThemeOverlay.MaterialComponents.Toolbar.Surface"

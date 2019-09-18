@@ -27,6 +27,7 @@ import androidx.room.Room
 import com.seanghay.studio.gles.shader.filter.pack.PackFilter
 import com.seanghay.studio.utils.BitmapProcessor
 import com.seanghay.studioexample.bottomsheet.FilterPackDialogFragment
+import com.seanghay.studioexample.bottomsheet.QuoteDialogFragment
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
 import com.zhihu.matisse.engine.impl.PicassoEngine
@@ -76,7 +77,10 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
         initAudio()
         initProgress()
         initRendering()
+
         isLoading.value = false
+
+
     }
 
     override fun onFilterPackSaved(filterPack: PackFilter) {
@@ -87,6 +91,10 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
         if (item.itemId == R.id.filter) {
             FilterPackDialogFragment.newInstance(composer.getCurrentFilterPack())
                 .show(supportFragmentManager, "filters")
+        }
+
+        if (item.itemId == R.id.quote) {
+            QuoteDialogFragment.newInstance().show(supportFragmentManager, "quote")
         }
 
         return super.onOptionsItemSelected(item)
@@ -170,7 +178,7 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
             (it.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         }
 
-        val bitmaps = slides.map { BitmapProcessor.load(it.path) }.toTypedArray()
+        val bitmaps = slides.map { it.path to BitmapProcessor.load(it.path) }.toTypedArray()
         composer.insertScenes(*bitmaps)
 
         slideAdapter.selectionChange = {

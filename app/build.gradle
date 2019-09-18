@@ -40,6 +40,7 @@ dependencies {
     implementation "androidx.room:room-ktx:$room_version"
     implementation 'id.zelory:compressor:2.1.0'
 
+    implementation "com.github.skydoves:colorpickerview:2.1.5"
     implementation 'com.zhihu.android:matisse:0.5.3-beta1'
     implementation project(':studio')
 

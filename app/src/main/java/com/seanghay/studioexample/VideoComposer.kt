@@ -21,18 +21,24 @@ import com.seanghay.studio.gles.shader.filter.PackFilterShader
 import com.seanghay.studio.gles.shader.filter.pack.PackFilter
 import com.seanghay.studio.gles.transition.TransitionStore
 import com.seanghay.studio.gles.transition.TransitionalTextureShader
+import com.seanghay.studio.utils.BitmapDiskCache
 import com.seanghay.studio.utils.BitmapProcessor
 import com.seanghay.studio.utils.clamp
 import com.seanghay.studio.utils.smoothStep
+import com.seanghay.studioexample.dao.md5
 import java.util.*
 import kotlin.math.abs
 
 class VideoComposer(private val context: Context) : StudioDrawable {
 
+
+    private val bitmapCache: BitmapDiskCache = BitmapDiskCache(context)
+
     private var studioRenderThread: StudioRenderThread? = null
     private var width: Int = -1
     private var height: Int = -1
     private var isReleased = false
+
 
     // Transitions
     private val transitions = TransitionStore.getAllTransitions()
@@ -82,14 +88,22 @@ class VideoComposer(private val context: Context) : StudioDrawable {
 
     fun getScenes(): List<Scene> = scenes
 
-    fun insertScenes(vararg bitmaps: Bitmap) {
-        for (bitmap in bitmaps) {
+    fun insertScenes(vararg bitmaps: Pair<String,Bitmap>) {
+        for ((path, bitmap) in bitmaps) {
+            val hash = path.md5()
 
-            val bitmapProcessor = BitmapProcessor(bitmap)
-            bitmapProcessor.crop(720, 405)
-            bitmapProcessor.cropType(BitmapProcessor.CropType.FIT_CENTER)
+            val scaledBitmap: Bitmap = if (bitmapCache.contains(hash)) {
+                bitmapCache.get(hash)!!
+            } else {
+                val bitmapProcessor = BitmapProcessor(bitmap)
+                bitmapProcessor.crop(720, 405)
+                bitmapProcessor.cropType(BitmapProcessor.CropType.FIT_CENTER)
+                val bmp = bitmapProcessor.proceed()
+                bitmapCache.set(hash, bmp)
+                bmp
+            }
 
-            val scene = Scene(bitmapProcessor.proceed())
+            val scene = Scene(scaledBitmap)
             scenes.add(scene)
 
             preDraw { scene.setup() }

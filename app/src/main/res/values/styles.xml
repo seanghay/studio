@@ -6,6 +6,7 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="materialButtonStyle">@style/MyButton</item>
+        <item name="textAppearanceBody1">@style/BoldTitle</item>
     </style>
 
     <style name="MyButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
@@ -20,5 +21,31 @@
         <item name="cornerSize">4dp</item>
     </style>
 
+
+    <style name="BoldTitle" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+
+    <style name="FullScreenDialogStyle" parent="ThemeOverlay.AppCompat.Dialog">
+        <item name="colorPrimary">@color/colorAccent</item>
+        <item name="colorAccent">@color/colorDark</item>
+        <item name="android:statusBarColor">@color/colorAccentDark</item>
+
+        <item name="android:windowNoTitle">true</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+
+        <!-- Set this to true if you want Full Screen without status bar -->
+        <item name="android:windowFullscreen">false</item>
+
+        <item name="android:windowIsFloating">false</item>
+
+        <!-- This is important! Don't forget to set window background -->
+        <item name="android:windowBackground">?colorSurface</item>
+
+        <!-- Additionally if you want animations when dialog opening -->
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
+    </style>
 
 </resources>

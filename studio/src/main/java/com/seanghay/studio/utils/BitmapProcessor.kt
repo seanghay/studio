@@ -53,11 +53,13 @@ class BitmapProcessor(private val source: Bitmap) {
         if (!fill) {
             val  bgPaint = Paint(Paint.ANTI_ALIAS_FLAG)
             val colorMatrix = ColorMatrix()
-            colorMatrix.setSaturation(.4f)
+            colorMatrix.setSaturation(.5f)
             val colorFilter = ColorMatrixColorFilter(colorMatrix)
-            bgPaint.alpha = 100
+            bgPaint.alpha = 150
             bgPaint.colorFilter = colorFilter
-            canvas.drawBitmap(source, null, backgroundFillRect(), bgPaint)
+
+            val bg = FastBlur.blur(source, 14, false)
+            canvas.drawBitmap(bg, null, backgroundFillRect(), bgPaint)
         }
 
         canvas.drawBitmap(source, null, dstRect, null)
@@ -67,7 +69,7 @@ class BitmapProcessor(private val source: Bitmap) {
 
     private fun backgroundFillRect(): Rect {
         val rect = fillCenterRect()
-        val scale = 0.25f
+        val scale = 0.1f
 
         val d = ((rect.right - rect.left) * scale).toInt()
         val h = ((rect.bottom - rect.top) * scale).toInt()
