@@ -26,7 +26,6 @@ class FilterPackDialogFragment : BottomSheetDialogFragment(), SeekBar.OnSeekBarC
     private val labelTextViews = mutableMapOf<String, TextView>()
     private var filterPack: PackFilter? = null
 
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is FilterPackListener) {
@@ -67,7 +66,7 @@ class FilterPackDialogFragment : BottomSheetDialogFragment(), SeekBar.OnSeekBarC
     }
 
     private fun saveAndClose() {
-        listener?.onFilterPackSaved(filterPack!!)
+        listener?.onFilterPackSaved(filterPack!!.copy())
         dismiss()
     }
 

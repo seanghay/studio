@@ -285,10 +285,7 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         }
     }
 
-    private val defaultPack = PackFilter(
-        saturation = 0.5f
-    )
-
+    private val defaultPack = PackFilter()
 
     override fun onDraw(): Boolean {
         run(preDrawRunnables)
@@ -306,7 +303,8 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         val currentScene = scenes[seekIndex]
 
         val currentTexture = currentScene.texture
-        val nextTexture = scenes.getOrNull(seekIndex + 1)?.texture ?: blankTexture
+        val nextScene = scenes.getOrNull(seekIndex + 1)
+        val nextTexture = nextScene?.texture ?: blankTexture
 
         val textureShader = textureShaders[currentScene.transition.name] ?: return false
         val interpolatedOffset = interpolateOffset(currentScene, offset).smoothStep(0f, 1f)
@@ -316,17 +314,19 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         textureShader.progress = interpolatedOffset
 
         clearColor()
-        filterShader.applyPackFilter(defaultPack)
+        filterShader.applyPackFilter(currentScene.filter)
         fromFrameBuffer.use {
             filterShader.draw(currentTexture)
         }
 
         clearColor()
+        filterShader.applyPackFilter(currentScene.filter)
+
         toFrameBuffer.use {
             filterShader.draw(nextTexture)
         }
 
-
+        filterShader.applyPackFilter(nextScene?.filter ?: defaultPack)
         filterFrameBuffer.use {
             textureShader.draw(fromFrameBuffer.toTexture(), toFrameBuffer.toTexture())
         }

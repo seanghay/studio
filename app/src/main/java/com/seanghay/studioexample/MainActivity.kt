@@ -104,12 +104,25 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
 
 
     override fun onFilterPackSaved(filterPack: PackFilter) {
-        composer.applyFilterPack(filterPack.copy())
+        if (slideAdapter.selectedAt != -1) {
+            composer.getScenes()[slideAdapter.selectedAt].filter = filterPack
+        } else {
+            composer.applyFilterPack(filterPack)
+        }
+
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.filter) {
-            FilterPackDialogFragment.newInstance(composer.getCurrentFilterPack())
+            var filter = composer.getCurrentFilterPack()
+
+            if (slideAdapter.selectedAt != -1) {
+                filter = composer.getScenes()[slideAdapter.selectedAt].filter
+            }
+
+            FilterPackDialogFragment
+                .newInstance(filter)
                 .show(supportFragmentManager, "filters")
         }
 
