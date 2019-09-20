@@ -10,6 +10,7 @@ class BitmapDiskCache(val context: Context) {
 
     fun set(key: String, value: Bitmap) {
         val dir = File(context.cacheDir, "bmp-cache")
+        if (!dir.exists()) dir.mkdirs()
         val file = File(dir, "bitmap-cache-$key.jpg")
         val fileOutputStream = FileOutputStream(file)
         value.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream)
@@ -18,13 +19,15 @@ class BitmapDiskCache(val context: Context) {
     }
 
     fun contains(key: String): Boolean {
-        val file = File(context.cacheDir, "bitmap-cache-$key.jpg")
+        val dir = File(context.cacheDir, "bmp-cache")
+        val file = File(dir, "bitmap-cache-$key.jpg")
         return file.exists()
     }
 
     fun get(key: String): Bitmap? {
+        val dir = File(context.cacheDir, "bmp-cache")
         return if (contains(key)) {
-            val file = File(context.cacheDir, "bitmap-cache-$key.jpg")
+            val file = File(dir, "bitmap-cache-$key.jpg")
             BitmapFactory.decodeFile(file.path)
         } else null
     }

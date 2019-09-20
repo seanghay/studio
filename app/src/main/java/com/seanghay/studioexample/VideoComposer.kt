@@ -31,14 +31,12 @@ import kotlin.math.abs
 
 class VideoComposer(private val context: Context) : StudioDrawable {
 
-
     private val bitmapCache: BitmapDiskCache = BitmapDiskCache(context)
 
     private var studioRenderThread: StudioRenderThread? = null
     private var width: Int = -1
     private var height: Int = -1
     private var isReleased = false
-
 
     // Transitions
     private val transitions = TransitionStore.getAllTransitions()
@@ -63,6 +61,7 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     private val quoteShader = TextureShader()
     private val quoteTexture = Texture2d()
 
+
     // Kenburns Effect
     private var mvpMatrix = mat4()
     private val kenburnsMatrix = mat4()
@@ -84,11 +83,17 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     private val filterFrameBuffer: FrameBuffer = FrameBuffer()
     private val frameBufferMvpMatrix = mat4()
 
+
+    private val fromFrameBuffer: FrameBuffer = FrameBuffer()
+    private val toFrameBuffer: FrameBuffer = FrameBuffer()
+
+
+
     fun getTransitions() = transitions
 
     fun getScenes(): List<Scene> = scenes
 
-    fun insertScenes(vararg bitmaps: Pair<String,Bitmap>) {
+    fun insertScenes(vararg bitmaps: Pair<String, Bitmap>) {
         for ((path, bitmap) in bitmaps) {
             val hash = path.md5()
 
@@ -143,11 +148,20 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         // FrameBuffer texture is upside down, so we have to flip it back to normal
         // That's kinda sad right?
         Matrix.scaleM(frameBufferMvpMatrix.elements, 0, 1f, -1f, 1f)
-        Matrix.multiplyMM(frameBufferMvpMatrix.elements, 0, mvpMatrix.elements, 0, frameBufferMvpMatrix.elements, 0)
+        Matrix.multiplyMM(
+            frameBufferMvpMatrix.elements,
+            0,
+            mvpMatrix.elements,
+            0,
+            frameBufferMvpMatrix.elements,
+            0
+        )
     }
 
     private fun setupFrameBuffer() {
         filterFrameBuffer.setup(width, height)
+        fromFrameBuffer.setup(width, height)
+        toFrameBuffer.setup(width, height)
     }
 
 
@@ -180,7 +194,10 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     }
 
     private fun setupQuoteShader() {
-        val quoteBitmap = TextBitmap.quoteBitmap(context, "ខ្ញុំបានមើលព្យុះ ដែលមានភាពស្រស់ស្អាតណាស់ ប៉ុន្តែគួរឲ្យខ្លាច")
+        val quoteBitmap = TextBitmap.quoteBitmap(
+            context,
+            "ខ្ញុំបានមើលព្យុះ ដែលមានភាពស្រស់ស្អាតណាស់ ប៉ុន្តែគួរឲ្យខ្លាច"
+        )
 
         quoteShader.setup()
         quoteTexture.initialize()
@@ -260,6 +277,18 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         }
     }
 
+    @GlContext
+    private fun clearColor() {
+        glScope("ClearColor") {
+            glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
+            glClearColor(0f, 0f, 0f, 1f)
+        }
+    }
+
+    private val defaultPack = PackFilter(
+        saturation = 0.5f
+    )
+
 
     override fun onDraw(): Boolean {
         run(preDrawRunnables)
@@ -269,10 +298,7 @@ class VideoComposer(private val context: Context) : StudioDrawable {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         }
 
-        glScope("ClearColor") {
-            glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
-            glClearColor(0f, 0f, 0f, 1f)
-        }
+        clearColor()
 
         val seekAt = totalDuration * progress
         val seekIndex = calculateIndexFromDuration(seekAt) ?: return false
@@ -284,21 +310,36 @@ class VideoComposer(private val context: Context) : StudioDrawable {
 
         val textureShader = textureShaders[currentScene.transition.name] ?: return false
         val interpolatedOffset = interpolateOffset(currentScene, offset).smoothStep(0f, 1f)
+
+        filterShader.mvpMatrix = frameBufferMvpMatrix
         textureShader.mvpMatrix = calculateMvpMatrix(offset, seekIndex)
         textureShader.progress = interpolatedOffset
 
-        filterFrameBuffer.use {
-            textureShader.draw(currentTexture, nextTexture)
+        clearColor()
+        filterShader.applyPackFilter(defaultPack)
+        fromFrameBuffer.use {
+            filterShader.draw(currentTexture)
         }
 
-        filterShader.mvpMatrix = frameBufferMvpMatrix
+        clearColor()
+        toFrameBuffer.use {
+            filterShader.draw(nextTexture)
+        }
+
+
+        filterFrameBuffer.use {
+            textureShader.draw(fromFrameBuffer.toTexture(), toFrameBuffer.toTexture())
+        }
+
+        filterShader.applyPackFilter(defaultFilterPack)
         filterShader.draw(filterFrameBuffer.toTexture())
+
+        quoteShader.mvpMatrix = mvpMatrix
+        quoteShader.draw(quoteTexture)
 
         watermarkShader.mvpMatrix = mvpMatrix
         watermarkShader.draw(watermarkTexture)
 
-        quoteShader.mvpMatrix = mvpMatrix
-        quoteShader.draw(quoteTexture)
 
         try {
             run(postDrawRunnables)
@@ -322,7 +363,6 @@ class VideoComposer(private val context: Context) : StudioDrawable {
 
         return newMatrix
     }
-
 
 
     @Synchronized
@@ -378,7 +418,7 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         canvas.drawBitmap(icon, null, dstRect, null)
         return bitmap
     }
-    
+
     fun applyQuoteBitmap(bitmap: Bitmap) {
         postDraw {
             quoteTexture.use(GL_TEXTURE_2D) {

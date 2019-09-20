@@ -106,12 +106,13 @@ class PackFilterShader: TextureShader(fragmentShaderSource = FRAGMENT_SHADER) {
             uniform mat4 sepiaMatrix;
 
             vec4 applyBrightness(vec4 color, float value) {
-                color.rgb += value;
+                color.rgb += clamp(value, 0.0, 1.0);
                 return color;
             }
             
             vec4 applyContrast(vec4 color, float value) {
-                return vec4(((color.rgb - vec3(0.5)) * value + vec3(0.5)), color.w);
+                float a = clamp(value, 0.5, 1.5);
+                return vec4(((color.rgb - vec3(0.5)) * a + vec3(0.5)), color.w);
             }
 
             vec4 applySaturation(vec4 color, float value) {
@@ -127,7 +128,7 @@ class PackFilterShader: TextureShader(fragmentShaderSource = FRAGMENT_SHADER) {
             }
             
             vec4 applyTint(vec4 color, float value) {
-                color.g += value;
+                color.g += clamp(value, -0.2, 0.2);
                 return color;
             }
             
@@ -157,8 +158,8 @@ class PackFilterShader: TextureShader(fragmentShaderSource = FRAGMENT_SHADER) {
                 vec4 color = texture2D(texture, texCoord);
                 vec4 textureColor = texture2D(texture, texCoord);
                 
+                
                 textureColor = applyBrightness(textureColor, brightness);
-                textureColor = applyContrast(textureColor, contrast);
                 textureColor = applySaturation(textureColor, saturation);
                 textureColor = applyWarmth(textureColor, warmth);
                 textureColor = applyTint(textureColor, tint);
@@ -166,7 +167,9 @@ class PackFilterShader: TextureShader(fragmentShaderSource = FRAGMENT_SHADER) {
                 textureColor = applyVibrant(textureColor, vibrant);
                 textureColor = applyColorMatrix(textureColor, colorMatrix, colorMatrixIntensity);
                 textureColor = applySepia(textureColor, sepia);
+                textureColor = applyContrast(textureColor, contrast);
                 
+
                 gl_FragColor = textureColor * intensity + color * (1.0 - intensity);
             }
             
