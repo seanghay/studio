@@ -16,8 +16,7 @@ import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 
 
 
-class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FRAGMENT_SHADER),
-    ToneCurveUtils {
+class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FRAGMENT_SHADER), ToneCurveUtils {
 
     private val toneCurveTexture: Texture2d = Texture2d()
     private val toneCurveUniform = uniform1i("curveTexture").autoInit()
@@ -26,8 +25,7 @@ class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FR
     private val postDrawRunnables: Queue<Runnable> = LinkedList()
 
     // Curves
-    private val defaultCurvePoints =
-        arrayOf(PointF(0.0f, 0.0f), PointF(0.5f, 0.5f), PointF(1.0f, 1.0f))
+    private val defaultCurvePoints = arrayOf(PointF(0.0f, 0.0f), PointF(0.5f, 0.5f), PointF(1.0f, 1.0f))
 
     private var rgbCompositeControlPoints: Array<PointF>
     private var redControlPoints: Array<PointF>
@@ -49,6 +47,7 @@ class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FR
         setRedControlPoints(redControlPoints)
         setGreenControlPoints(greenControlPoints)
         setBlueControlPoints(blueControlPoints)
+        updateToneCurveTexture()
     }
 
     private inline fun preDraw(crossinline runnable: () -> Unit) {
@@ -68,7 +67,6 @@ class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FR
         toneCurveTexture.use(GL_TEXTURE_2D) {
             toneCurveTexture.configure(GL_TEXTURE_2D)
         }
-
     }
 
     override fun beforeDrawVertices() {
@@ -84,41 +82,54 @@ class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FR
     }
 
 
-    fun setRgbCompositeControlPoints(points: Array<PointF>) {
+    private fun setRgbCompositeControlPoints(points: Array<PointF>) {
         rgbCompositeControlPoints = points
         rgbCompositeCurve = createSplineCurve(rgbCompositeControlPoints)
             ?: throw RuntimeException("Points was null")
-
-        updateToneCurveTexture()
     }
 
-    fun setRedControlPoints(points: Array<PointF>) {
+    private fun setRedControlPoints(points: Array<PointF>) {
         redControlPoints = points
         redCurve = createSplineCurve(redControlPoints)
             ?: throw RuntimeException("redControlPoints was null")
-        updateToneCurveTexture()
     }
 
-    fun setGreenControlPoints(points: Array<PointF>) {
+    private fun setGreenControlPoints(points: Array<PointF>) {
         greenControlPoints = points
         greenCurve =
             createSplineCurve(greenControlPoints)
                 ?: throw RuntimeException("greenControlPoints was null")
-        updateToneCurveTexture()
     }
 
-    fun setBlueControlPoints(points: Array<PointF>) {
+    private fun setBlueControlPoints(points: Array<PointF>) {
         blueControlPoints = points
         blueCurve =
             createSplineCurve(blueControlPoints)
                 ?: throw RuntimeException("blueControlPoints was null")
-        updateToneCurveTexture()
     }
 
     fun updateToneCurveTexture() {
         glScope("Update ToneCurve Texture") {
             preDraw(this::updateToneCurve)
         }
+    }
+
+    fun applyToneCurve(toneCurve: ToneCurve?) {
+        if (toneCurve == null) {
+            resetCurves()
+            return
+        }
+
+        val rgb = toneCurve.rgb ?: defaultCurvePoints.clone()
+        val r = toneCurve.r ?: defaultCurvePoints.clone()
+        val g = toneCurve.g ?: defaultCurvePoints.clone()
+        val b = toneCurve.b ?: defaultCurvePoints.clone()
+
+        setRgbCompositeControlPoints(rgb)
+        setRedControlPoints(r)
+        setGreenControlPoints(g)
+        setBlueControlPoints(b)
+        updateToneCurveTexture()
     }
 
     @GlContext
@@ -131,7 +142,6 @@ class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FR
                         ((curveIndex.toFloat() + blueCurve[curveIndex] + rgbCompositeCurve[curveIndex]).coerceAtLeast(
                             0f
                         ).coerceAtMost(255f).toInt() and 0xff).toByte()
-
 
                     curves[curveIndex * 4 + 1] =
                         ((curveIndex.toFloat() + greenCurve[curveIndex] +
@@ -156,6 +166,14 @@ class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FR
         }
     }
 
+
+    fun resetCurves() {
+        this.setRgbCompositeControlPoints(defaultCurvePoints.clone())
+        this.setRedControlPoints(defaultCurvePoints.clone())
+        this.setGreenControlPoints(defaultCurvePoints.clone())
+        this.setBlueControlPoints(defaultCurvePoints.clone())
+        updateToneCurveTexture()
+    }
 
     fun fromCurveFile(input: InputStream) {
         try {
@@ -198,6 +216,8 @@ class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FR
                 setBlueControlPoints(it)
             }
 
+            updateToneCurveTexture()
+
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -210,6 +230,7 @@ class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FR
     }
 
     companion object {
+
         // language=glsl
         @JvmField
         val TONE_CURVE_FRAGMENT_SHADER = """
@@ -218,12 +239,18 @@ class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FR
             uniform sampler2D curveTexture;
             varying vec2 texCoord;
             
+            vec4 tone_curve(sampler2D curve, vec4 t);
+
             void main() {
                 lowp vec4 t = texture2D(texture, texCoord);
-                lowp float r = texture2D(curveTexture, vec2(t.r, 0.0)).r;
-                lowp float g = texture2D(curveTexture, vec2(t.g, 0.0)).g;
-                lowp float b = texture2D(curveTexture, vec2(t.b, 0.0)).b;
-                gl_FragColor = vec4(r, g, b, t.a);
+                 gl_FragColor = tone_curve(curveTexture, t);
+            }
+            
+            vec4 tone_curve(sampler2D curve, vec4 t) {
+                lowp float r = texture2D(curve, vec2(t.r, 0.0)).r;
+                lowp float g = texture2D(curve, vec2(t.g, 0.0)).g;
+                lowp float b = texture2D(curve, vec2(t.b, 0.0)).b;
+                return vec4(r, g, b, t.a);
             }
             
         """.trimIndent()

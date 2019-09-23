@@ -1,8 +1,6 @@
 package com.seanghay.studio.gles.shader.filter
 
-import com.seanghay.studio.gles.shader.filter.ColorMatrixFilterShader
-
-class SepiaToneFilterShader: ColorMatrixFilterShader() {
+class SepiaToneFilterShader : ColorMatrixFilterShader() {
 
     init {
         colorMatrix.elements = floatArrayOf(

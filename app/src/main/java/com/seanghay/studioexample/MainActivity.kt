@@ -107,10 +107,8 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
         if (slideAdapter.selectedAt != -1) {
             composer.getScenes()[slideAdapter.selectedAt].filter = filterPack
         } else {
-            composer.applyFilterPack(filterPack)
+            composer.applyFilterPack(filterPack, true)
         }
-
-
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

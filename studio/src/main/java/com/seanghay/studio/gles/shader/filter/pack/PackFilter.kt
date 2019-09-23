@@ -3,6 +3,7 @@ package com.seanghay.studio.gles.shader.filter.pack
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.FloatRange
+import com.seanghay.studio.gles.shader.filter.tonecurve.ToneCurve
 
 data class PackFilter(
     @FloatRange(from = 0.0, to = 1.0)
@@ -31,9 +32,11 @@ data class PackFilter(
     var vibrant: Float = 0f,
 
     @FloatRange(from = 0.0, to = 1.0)
-    var sepia: Float = 0f
-): Parcelable {
+    var sepia: Float = 0f,
 
+    var toneCurve: ToneCurve? = null
+
+) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readFloat(),
         parcel.readFloat(),
@@ -43,7 +46,8 @@ data class PackFilter(
         parcel.readFloat(),
         parcel.readFloat(),
         parcel.readFloat(),
-        parcel.readFloat()
+        parcel.readFloat(),
+        parcel.readParcelable(ToneCurve::class.java.classLoader)
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -56,6 +60,7 @@ data class PackFilter(
         parcel.writeFloat(gamma)
         parcel.writeFloat(vibrant)
         parcel.writeFloat(sepia)
+        parcel.writeParcelable(toneCurve, flags)
     }
 
     override fun describeContents(): Int {
@@ -71,5 +76,4 @@ data class PackFilter(
             return arrayOfNulls(size)
         }
     }
-
 }

@@ -18,9 +18,10 @@ import com.seanghay.studio.gles.kenburns.Kenburns
 import com.seanghay.studio.gles.kenburns.SimpleKenburns
 import com.seanghay.studio.gles.shader.TextureShader
 import com.seanghay.studio.gles.shader.filter.PackFilterShader
-import com.seanghay.studio.gles.shader.filter.tonecurve.ToneCurveFilterShader
 import com.seanghay.studio.gles.shader.filter.pack.PackFilter
-import com.seanghay.studio.gles.shader.filter.tonecurve.SimpleToneCurvePack
+import com.seanghay.studio.gles.shader.filter.tonecurve.ToneCurve
+import com.seanghay.studio.gles.shader.filter.tonecurve.ToneCurveFilterShader
+import com.seanghay.studio.gles.shader.filter.tonecurve.simple.SimpleToneCurve
 import com.seanghay.studio.gles.transition.TransitionStore
 import com.seanghay.studio.gles.transition.TransitionalTextureShader
 import com.seanghay.studio.utils.BitmapDiskCache
@@ -145,7 +146,8 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         }
 
         val curveFile = context.assets.open("curves/Mark-Galer-Grading.acv")
-        toneCurveFilterShader.fromCurveFile(curveFile)
+        toneCurveFilterShader.applyToneCurve(ToneCurve.fromInputStream(curveFile))
+
     }
 
     private fun setupToneCurve() {
@@ -183,9 +185,9 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         filterShader.applyPackFilter(defaultFilterPack)
     }
 
-    fun applyFilterPack(filter: PackFilter) {
+    fun applyFilterPack(filter: PackFilter, refresh: Boolean = true) {
         defaultFilterPack = filter
-        filterShader.applyPackFilter(defaultFilterPack)
+        filterShader.applyPackFilter(defaultFilterPack, refresh)
     }
 
     fun getCurrentFilterPack(): PackFilter {
@@ -346,20 +348,18 @@ class VideoComposer(private val context: Context) : StudioDrawable {
             textureShader.draw(fromFrameBuffer.toTexture(), toFrameBuffer.toTexture())
         }
 
+        applyFilterPack(defaultFilterPack, false)
+        filterShader.draw(filterFrameBuffer.toTexture())
 
-        toneCurveFrameBuffer.use {
-            filterShader.applyPackFilter(defaultFilterPack)
-            filterShader.draw(filterFrameBuffer.toTexture())
+        quoteShader.mvpMatrix = mvpMatrix
+        quoteShader.draw(quoteTexture)
 
-            quoteShader.mvpMatrix = mvpMatrix
-            quoteShader.draw(quoteTexture)
+        watermarkShader.mvpMatrix = mvpMatrix
+        watermarkShader.draw(watermarkTexture)
 
-            watermarkShader.mvpMatrix = mvpMatrix
-            watermarkShader.draw(watermarkTexture)
-        }
 
-        toneCurveFilterShader.mvpMatrix = mvpMatrix
-        toneCurveFilterShader.draw(toneCurveFrameBuffer.toTexture())
+//        toneCurveFilterShader.mvpMatrix = mvpMatrix
+//        toneCurveFilterShader.draw(toneCurveFrameBuffer.toTexture())
 
         try {
             run(postDrawRunnables)
@@ -383,6 +383,8 @@ class VideoComposer(private val context: Context) : StudioDrawable {
 
         return newMatrix
     }
+
+
 
 
     @Synchronized
