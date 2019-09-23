@@ -5,6 +5,7 @@ import android.graphics.*
 import android.opengl.GLES20.*
 import android.opengl.GLUtils
 import android.opengl.Matrix
+import android.util.Size
 import android.view.TextureView
 import com.seanghay.studio.core.StudioDrawable
 import com.seanghay.studio.core.StudioRenderThread
@@ -21,7 +22,6 @@ import com.seanghay.studio.gles.shader.filter.PackFilterShader
 import com.seanghay.studio.gles.shader.filter.pack.PackFilter
 import com.seanghay.studio.gles.shader.filter.tonecurve.ToneCurve
 import com.seanghay.studio.gles.shader.filter.tonecurve.ToneCurveFilterShader
-import com.seanghay.studio.gles.shader.filter.tonecurve.simple.SimpleToneCurve
 import com.seanghay.studio.gles.transition.TransitionStore
 import com.seanghay.studio.gles.transition.TransitionalTextureShader
 import com.seanghay.studio.utils.BitmapDiskCache
@@ -34,12 +34,21 @@ import kotlin.math.abs
 
 class VideoComposer(private val context: Context) : StudioDrawable {
 
+    override fun renderAtProgress(progress: Float) {
+        this.progress = progress
+    }
+
+    var videoSize: Size = Size(1920, 1080)
+
     private val bitmapCache: BitmapDiskCache = BitmapDiskCache(context)
 
     private var studioRenderThread: StudioRenderThread? = null
-    private var width: Int = -1
-    private var height: Int = -1
+
+    var width: Int = -1
+    var height: Int = -1
+
     private var isReleased = false
+    private var isSetup = false
 
     // Transitions
     private val transitions = TransitionStore.getAllTransitions()
@@ -70,7 +79,7 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     private val kenburnsMatrix = mat4()
 
     private val newMatrix = mat4()
-    private val kenburns: Kenburns = SimpleKenburns(0f, .25f)
+    private val kenburns: Kenburns = SimpleKenburns(0f, .1f)
 
     // Progression
     var progress: Float = 0f
@@ -105,7 +114,7 @@ class VideoComposer(private val context: Context) : StudioDrawable {
                 bitmapCache.get(hash)!!
             } else {
                 val bitmapProcessor = BitmapProcessor(bitmap)
-                bitmapProcessor.crop(720, 405)
+                bitmapProcessor.crop(videoSize.width, videoSize.height)
                 bitmapProcessor.cropType(BitmapProcessor.CropType.FIT_CENTER)
                 val bmp = bitmapProcessor.proceed()
                 bitmapCache.set(hash, bmp)
@@ -127,6 +136,7 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     }
 
     override fun onSetup() {
+        if (isSetup) return
         textureShaders.forEach { it.value.setup() }
         setupToneCurve()
         setupBlackTexture()
@@ -147,7 +157,7 @@ class VideoComposer(private val context: Context) : StudioDrawable {
 
         val curveFile = context.assets.open("curves/Mark-Galer-Grading.acv")
         toneCurveFilterShader.applyToneCurve(ToneCurve.fromInputStream(curveFile))
-
+        isSetup = true
     }
 
     private fun setupToneCurve() {
@@ -384,9 +394,6 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         return newMatrix
     }
 
-
-
-
     @Synchronized
     fun release() {
         if (isReleased) return
@@ -423,8 +430,8 @@ class VideoComposer(private val context: Context) : StudioDrawable {
 
     private fun watermarkBitmap(): Bitmap {
         val margin = 20
-        val w = 720
-        val h = 405
+        val w = videoSize.width
+        val h = videoSize.height
 
         val icon = BitmapFactory.decodeResource(context.resources, R.drawable.togness)
         val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
@@ -449,4 +456,15 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         }
     }
 
+    fun clone(composer: VideoComposer) {
+        this.scenes.addAll(composer.scenes)
+        this.totalDuration = composer.totalDuration
+        this.preDraw {
+            this.scenes.forEach {
+                it.setup()
+            }
+        }
+
+        this.defaultFilterPack = composer.defaultFilterPack
+    }
 }

@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.OpenableColumns
+import android.util.Size
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -38,6 +39,7 @@ import org.apache.commons.io.IOUtils
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
+import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackListener, QuoteDialogFragment.QuoteListener {
 
@@ -165,8 +167,9 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
     }
 
     private fun initRendering() {
-        textureView.surfaceTextureListener = composer.surfaceTextureListener
+        // textureView.surfaceTextureListener = composer.surfaceTextureListener
     }
+
 
     private fun initAudio() {
         if (audio != null) return
@@ -282,7 +285,19 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
     }
 
     private fun exportAsVideoFile() {
+        thread {
 
+            val c = composer
+
+            val path = File(externalCacheDir, "my-video.mp4").path
+            val mp4Composer = Mp4Composer(c, path,  composer.totalDuration)
+
+            c.videoSize = Size(mp4Composer.width, mp4Composer.height)
+            c.width = mp4Composer.width
+            c.height = mp4Composer.height
+
+            mp4Composer.start()
+        }
     }
 
     private fun chooseAudio() {
