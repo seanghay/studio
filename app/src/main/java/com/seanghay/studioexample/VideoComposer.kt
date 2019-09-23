@@ -18,7 +18,9 @@ import com.seanghay.studio.gles.kenburns.Kenburns
 import com.seanghay.studio.gles.kenburns.SimpleKenburns
 import com.seanghay.studio.gles.shader.TextureShader
 import com.seanghay.studio.gles.shader.filter.PackFilterShader
+import com.seanghay.studio.gles.shader.filter.tonecurve.ToneCurveFilterShader
 import com.seanghay.studio.gles.shader.filter.pack.PackFilter
+import com.seanghay.studio.gles.shader.filter.tonecurve.SimpleToneCurvePack
 import com.seanghay.studio.gles.transition.TransitionStore
 import com.seanghay.studio.gles.transition.TransitionalTextureShader
 import com.seanghay.studio.utils.BitmapDiskCache
@@ -66,7 +68,6 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     private var mvpMatrix = mat4()
     private val kenburnsMatrix = mat4()
 
-
     private val newMatrix = mat4()
     private val kenburns: Kenburns = SimpleKenburns(0f, .25f)
 
@@ -78,15 +79,17 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     private val filterShader = PackFilterShader()
     private var defaultFilterPack = PackFilter()
 
+    // Tone Curve Filter
+    private val toneCurveFilterShader =
+        ToneCurveFilterShader()
 
     // FrameBuffers
     private val filterFrameBuffer: FrameBuffer = FrameBuffer()
     private val frameBufferMvpMatrix = mat4()
 
-
     private val fromFrameBuffer: FrameBuffer = FrameBuffer()
     private val toFrameBuffer: FrameBuffer = FrameBuffer()
-
+    private val toneCurveFrameBuffer: FrameBuffer = FrameBuffer()
 
 
     fun getTransitions() = transitions
@@ -124,6 +127,7 @@ class VideoComposer(private val context: Context) : StudioDrawable {
 
     override fun onSetup() {
         textureShaders.forEach { it.value.setup() }
+        setupToneCurve()
         setupBlackTexture()
         setupWatermarkShader()
         setupQuoteShader()
@@ -139,7 +143,14 @@ class VideoComposer(private val context: Context) : StudioDrawable {
                 }
             }
         }
+
+        toneCurveFilterShader.setRedControlPoints(SimpleToneCurvePack.blueMessRedKnots)
     }
+
+    private fun setupToneCurve() {
+        toneCurveFilterShader.setup()
+    }
+
 
     private fun setFrameBufferMatrices() {
         // Reset Matrix
@@ -162,6 +173,7 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         filterFrameBuffer.setup(width, height)
         fromFrameBuffer.setup(width, height)
         toFrameBuffer.setup(width, height)
+        toneCurveFrameBuffer.setup(width, height)
     }
 
 
@@ -310,8 +322,10 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         val interpolatedOffset = interpolateOffset(currentScene, offset).smoothStep(0f, 1f)
 
         filterShader.mvpMatrix = frameBufferMvpMatrix
+
         textureShader.mvpMatrix = calculateMvpMatrix(offset, seekIndex)
         textureShader.progress = interpolatedOffset
+
 
         clearColor()
         filterShader.applyPackFilter(currentScene.filter)
@@ -331,15 +345,20 @@ class VideoComposer(private val context: Context) : StudioDrawable {
             textureShader.draw(fromFrameBuffer.toTexture(), toFrameBuffer.toTexture())
         }
 
-        filterShader.applyPackFilter(defaultFilterPack)
-        filterShader.draw(filterFrameBuffer.toTexture())
 
-        quoteShader.mvpMatrix = mvpMatrix
-        quoteShader.draw(quoteTexture)
+        toneCurveFrameBuffer.use {
+            filterShader.applyPackFilter(defaultFilterPack)
+            filterShader.draw(filterFrameBuffer.toTexture())
 
-        watermarkShader.mvpMatrix = mvpMatrix
-        watermarkShader.draw(watermarkTexture)
+            quoteShader.mvpMatrix = mvpMatrix
+            quoteShader.draw(quoteTexture)
 
+            watermarkShader.mvpMatrix = mvpMatrix
+            watermarkShader.draw(watermarkTexture)
+        }
+
+        toneCurveFilterShader.mvpMatrix = mvpMatrix
+        toneCurveFilterShader.draw(toneCurveFrameBuffer.toTexture())
 
         try {
             run(postDrawRunnables)

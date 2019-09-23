@@ -10,7 +10,6 @@ open class Texture2dUniform(name: String, var texture2d: Texture2d): TextureUnif
         texture2d.configure(textureTarget)
     }
 
-
     override fun setValue(value: Int) {
         rationalChecks()
         GLES20.glUniform1i(_location, value)

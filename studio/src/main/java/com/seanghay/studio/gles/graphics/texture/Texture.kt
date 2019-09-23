@@ -29,7 +29,7 @@ open class Texture(var id: Int = NO_TEXTURE) {
         GLES20.glBindTexture(textureTarget, 0)
     }
 
-    fun use(textureTarget: Int, block: () -> Unit) {
+    inline fun use(textureTarget: Int, block: () -> Unit) {
         enable(textureTarget)
         block()
         disable(textureTarget)

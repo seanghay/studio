@@ -58,9 +58,6 @@ class PackFilterShader: TextureShader(fragmentShaderSource = FRAGMENT_SHADER) {
         )
     }
 
-
-
-
     override fun beforeDrawVertices() {
         super.beforeDrawVertices()
         intensityUniform.setValue(intensity)
@@ -77,7 +74,7 @@ class PackFilterShader: TextureShader(fragmentShaderSource = FRAGMENT_SHADER) {
         colorMatrixIntensityUniform.setValue(colorMatrixIntensity)
     }
 
-    
+
     companion object {
         // language=glsl
 
@@ -157,8 +154,7 @@ class PackFilterShader: TextureShader(fragmentShaderSource = FRAGMENT_SHADER) {
             
                 vec4 color = texture2D(texture, texCoord);
                 vec4 textureColor = texture2D(texture, texCoord);
-                
-                
+
                 textureColor = applyBrightness(textureColor, brightness);
                 textureColor = applySaturation(textureColor, saturation);
                 textureColor = applyWarmth(textureColor, warmth);
