@@ -11,8 +11,9 @@ import java.io.IOException
 import java.io.InputStream
 import java.nio.ByteBuffer
 import java.util.*
-import kotlin.collections.ArrayList
-import java.lang.NullPointerException
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
+
 
 
 class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FRAGMENT_SHADER),
@@ -39,12 +40,16 @@ class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FR
     private lateinit var blueCurve: ArrayList<Float>
 
     init {
-        rgbCompositeControlPoints = defaultCurvePoints
-        redControlPoints = defaultCurvePoints
-        greenControlPoints = defaultCurvePoints
-        blueControlPoints = defaultCurvePoints
-    }
+        rgbCompositeControlPoints = defaultCurvePoints.clone()
+        redControlPoints = defaultCurvePoints.clone()
+        greenControlPoints = defaultCurvePoints.clone()
+        blueControlPoints = defaultCurvePoints.clone()
 
+        setRgbCompositeControlPoints(rgbCompositeControlPoints)
+        setRedControlPoints(redControlPoints)
+        setGreenControlPoints(greenControlPoints)
+        setBlueControlPoints(blueControlPoints)
+    }
 
     private inline fun preDraw(crossinline runnable: () -> Unit) {
         preDrawRunnables.add(Runnable { runnable() })
@@ -64,10 +69,6 @@ class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FR
             toneCurveTexture.configure(GL_TEXTURE_2D)
         }
 
-        setRgbCompositeControlPoints(rgbCompositeControlPoints)
-        setRedControlPoints(redControlPoints)
-        setGreenControlPoints(greenControlPoints)
-        setBlueControlPoints(blueControlPoints)
     }
 
     override fun beforeDrawVertices() {
@@ -158,8 +159,12 @@ class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FR
 
     fun fromCurveFile(input: InputStream) {
         try {
+
+            // Hell yeah! Must read
+            val version = input.readShort()
+
             val totalCurves = input.readShort()
-            val pointRate = 1.0f / 255f
+            val pointRate = 1.0f / 255.0f
             val curves = arrayListOf<Array<PointF>>()
 
             for (i in 0 until totalCurves) {
@@ -176,11 +181,22 @@ class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FR
             }
 
             input.close()
-            rgbCompositeControlPoints = curves.getOrNull(0) ?: throw NullPointerException()
-            redControlPoints = curves.getOrNull(1) ?: throw NullPointerException()
-            greenControlPoints = curves.getOrNull(2) ?: throw NullPointerException()
-            blueControlPoints = curves.getOrNull(3) ?: throw NullPointerException()
-            updateToneCurveTexture()
+
+            curves.getOrNull(0)?.takeIf { it.isNotEmpty() }?.let {
+                setRgbCompositeControlPoints(it)
+            }
+
+            curves.getOrNull(1)?.takeIf { it.isNotEmpty() }?.let {
+                setRedControlPoints(it)
+            }
+
+            curves.getOrNull(2)?.takeIf { it.isNotEmpty() }?.let {
+                setGreenControlPoints(it)
+            }
+
+            curves.getOrNull(3)?.takeIf { it.isNotEmpty() }?.let {
+                setBlueControlPoints(it)
+            }
 
         } catch (e: IOException) {
             e.printStackTrace()

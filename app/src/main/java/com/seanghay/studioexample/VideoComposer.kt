@@ -144,7 +144,8 @@ class VideoComposer(private val context: Context) : StudioDrawable {
             }
         }
 
-        toneCurveFilterShader.setRedControlPoints(SimpleToneCurvePack.blueMessRedKnots)
+        val curveFile = context.assets.open("curves/Mark-Galer-Grading.acv")
+        toneCurveFilterShader.fromCurveFile(curveFile)
     }
 
     private fun setupToneCurve() {

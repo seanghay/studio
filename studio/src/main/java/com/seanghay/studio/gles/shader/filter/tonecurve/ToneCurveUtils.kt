@@ -91,8 +91,7 @@ interface ToneCurveUtils {
                 val a = 1 - t
                 val h = (next.x - cur.x).toDouble()
 
-                var y =
-                    a * cur.y + t * next.y + h * h / 6 * ((a * a * a - a) * sd[i] + (t * t * t - t) * sd[i + 1])
+                var y = a * cur.y + t * next.y + h * h / 6.0 * ((a * a * a - a) * sd[i] + (t * t * t - t) * sd[i + 1])
 
                 if (y > 255.0) {
                     y = 255.0
@@ -100,7 +99,7 @@ interface ToneCurveUtils {
                     y = 0.0
                 }
 
-                output.add(Point(x, y.roundToInt()))
+                output.add(Point(x, Math.round(y).toInt()))
             }
         }
 
