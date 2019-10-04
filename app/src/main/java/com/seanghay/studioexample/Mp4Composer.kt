@@ -7,21 +7,19 @@ import android.media.MediaFormat
 import android.media.MediaMuxer
 import android.util.Log
 import android.view.Surface
+import com.seanghay.studio.core.Studio
 import com.seanghay.studio.core.StudioDrawable
-import com.seanghay.studio.gles.egl.EglCore
-import com.seanghay.studio.gles.egl.EglWindowSurface
 import com.seanghay.studio.utils.outputBufferAt
 import java.io.File
 
 
 class Mp4Composer(
+    private val studio: Studio,
     private val drawable: StudioDrawable,
     private val outputPath: String,
-    private val duration: Long
+    private val duration: Long,
+    val onFinished: () -> Unit
 ) {
-
-    private var eglCore: EglCore? = null
-    private var windowSurface: EglWindowSurface? = null
 
     var width: Int = 1920
     var height: Int = 1080
@@ -40,57 +38,61 @@ class Mp4Composer(
     var isMuxerStarted = false
     var trackIndex = -1
 
+
+    private lateinit var surface: Surface
+
+
     private fun computePresentationTimeNsec(frameIndex: Long): Long {
         val ONE_BILLION: Long = 1000000000
         return frameIndex * ONE_BILLION / frameRate
     }
 
-    fun start() {
-        try {
-            val file = File(outputPath)
-            if (file.exists()) file.delete()
 
-            create {
-                eglCore = EglCore()
-                eglCore?.setup()
-                windowSurface = EglWindowSurface(eglCore!!, it, false)
-                windowSurface!!.makeCurrent()
-                drawable.onSetup()
-            }
+    fun create() {
 
-            // Make Current
-            for (i in 0 until frameCount) {
-                val progress = i.toFloat() / frameCount.toFloat()
-                drawable.renderAtProgress(progress)
-                windowSurface!!.makeCurrent()
-                drainEncoder(false)
-                drawable.onDraw()
-                //drawable.onDraw()
-                windowSurface!!.setPresentationTime(computePresentationTimeNsec(i))
-                windowSurface!!.swapBuffers()
-                Log.d("Mp4Composer", "Generated frame: $i, Progress: $progress")
-            }
-
-            drainEncoder(true)
-        } finally {
-            release()
+        bufferInfo = BufferInfo()
+        val format = createVideoFormat()
+        encoder = createEncoderByType(mimeType).also {
+            it.configure(format, null, null, CONFIGURE_FLAG_ENCODE)
+            surface = it.createInputSurface()
+            it.start()
+            muxer = MediaMuxer(outputPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
+            isMuxerStarted = false
+            trackIndex = -1
         }
     }
 
-    private fun create(onSurfaceAvailable: (Surface) -> Unit) {
-        bufferInfo = BufferInfo()
-        val format = createVideoFormat()
+    fun start() {
 
-        encoder = createEncoderByType(mimeType)
-            .also {
-                it.configure(format, null, null, CONFIGURE_FLAG_ENCODE)
-                val surface: Surface = it.createInputSurface()
-                onSurfaceAvailable(surface)
-                it.start()
-                muxer = MediaMuxer(outputPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
-                isMuxerStarted = false
-                trackIndex = -1
+        try {
+            // val file = File(outputPath)
+            // if (file.exists()) file.delete()
+
+            val exportSurface = studio.createOutputSurface()
+            exportSurface.fromSurface(surface)
+            studio.setOutputSurface(exportSurface)
+
+            // Make Current
+            studio.post {
+                for (i in 0 until frameCount) {
+                    val progress = i.toFloat() / frameCount.toFloat()
+                    drawable.renderAtProgress(progress)
+                    studio.directDraw({
+                        drainEncoder(false)
+                    }, {
+                        exportSurface.eglSurface.setPresentationTime(computePresentationTimeNsec(i))
+                    })
+
+                    Log.d("Mp4Composer", "Generated frame: $i, Progress: $progress")
+                }
+                drainEncoder(true)
+                release()
+                onFinished()
             }
+
+        } finally {
+            // release()
+        }
     }
 
 
@@ -102,7 +104,6 @@ class Mp4Composer(
         }
 
         while (true) {
-            Log.d("Loop", "LLL")
             val encoderStatus = encoder.dequeueOutputBuffer(bufferInfo, timeOut)
             if (encoderStatus == INFO_TRY_AGAIN_LATER) {
                 if (!endOfStream) break
@@ -161,23 +162,19 @@ class Mp4Composer(
 
 
     fun release() {
-        encoder?.apply {
-            stop()
-            release()
-            encoder = null
-        }
-
         muxer?.apply {
             stop()
             release()
             muxer = null
         }
 
-        eglCore?.release()
-        eglCore = null
+        encoder?.apply {
+            stop()
+            release()
+            encoder = null
+        }
 
-        windowSurface?.release()
-        windowSurface = null
+
     }
 
     private fun createVideoFormat(): MediaFormat {

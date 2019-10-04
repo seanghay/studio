@@ -1,7 +1,8 @@
 package com.seanghay.studio.gles.egl
 
 class EglOffscreenSurface(
-    eglCore: EglCore, width: Int,
+    eglCore: EglCore,
+    width: Int,
     height: Int
 ) : EglSurfaceBase(eglCore) {
 

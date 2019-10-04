@@ -24,6 +24,10 @@ class StudioRenderThread(private val surfaceTexture: SurfaceTexture): Thread() {
         windowSurface = EglWindowSurface(eglCore, surfaceTexture)
     }
 
+    fun recreate() {
+        windowSurface.recreate(eglCore)
+    }
+
     private fun swapBuffers() {
         windowSurface.swapBuffers()
     }
@@ -45,6 +49,7 @@ class StudioRenderThread(private val surfaceTexture: SurfaceTexture): Thread() {
         setup()
         makeCurrent()
         drawable?.onSetup()
+
         while (isRunning && !interrupted()) {
             makeCurrent()
             if (drawFrame())
@@ -53,6 +58,8 @@ class StudioRenderThread(private val surfaceTexture: SurfaceTexture): Thread() {
 
         release()
     }
+
+    fun getEglCore(): EglCore = eglCore
 
     fun quit() {
         isRunning = false

@@ -1,7 +1,14 @@
 package com.seanghay.studio.core
 
-interface StudioDrawable {
+import com.seanghay.studio.gles.RenderContext
+
+interface StudioDrawable: RenderContext {
     fun onSetup()
-    fun onDraw(): Boolean
     fun renderAtProgress(progress: Float)
+
+    override fun onCreated() {
+        onSetup()
+    }
+
 }
+

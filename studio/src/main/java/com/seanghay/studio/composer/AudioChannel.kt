@@ -37,7 +37,7 @@ class AudioChannel(
             throw UnsupportedOperationException("Input channel count ($inputChannelCount) not supported.")
 
         if (outputChannelCount != 1 && outputChannelCount != 2)
-            throw UnsupportedOperationException("Output channel count ($outputChannelCount) not supported.")
+            throw UnsupportedOperationException("OutputSurface channel count ($outputChannelCount) not supported.")
 
         this.actualDecodedFormat = format
         overflowBuffer.presentationTimeUs = 0

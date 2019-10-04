@@ -6,14 +6,15 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.SurfaceTexture
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.OpenableColumns
-import android.util.Size
 import android.view.Menu
 import android.view.MenuItem
+import android.view.TextureView
 import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.SeekBar
@@ -39,9 +40,9 @@ import org.apache.commons.io.IOUtils
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
-import kotlin.concurrent.thread
 
-class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackListener, QuoteDialogFragment.QuoteListener {
+class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackListener,
+    QuoteDialogFragment.QuoteListener {
 
 
     private val slides = arrayListOf<SlideEntity>()
@@ -92,6 +93,68 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
         initRendering()
 
         isLoading.value = false
+
+        launch()
+    }
+
+    private fun launch() {
+        var littleBox: LittleBox? = null
+
+        textureView.surfaceTextureListener = object : TextureView.SurfaceTextureListener {
+            override fun onSurfaceTextureSizeChanged(
+                surface: SurfaceTexture?,
+                width: Int,
+                height: Int
+            ) {
+                littleBox?.resize(width, height)
+            }
+
+            override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
+            }
+
+            override fun onSurfaceTextureDestroyed(surface: SurfaceTexture?): Boolean {
+                // littleBox?.release()
+                return false
+            }
+
+            override fun onSurfaceTextureAvailable(
+                surface: SurfaceTexture?,
+                width: Int,
+                height: Int
+            ) {
+                if (surface == null) return
+                littleBox = LittleBox(this@MainActivity, surface, width, height)
+                littleBox?.setComposer(composer)
+
+                seekBarProgress.setOnSeekBarChangeListener(object :
+                    SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+                        textViewProgress.text = HtmlCompat.fromHtml(
+                            "Progress: <strong>$p1%</strong>",
+                            HtmlCompat.FROM_HTML_MODE_LEGACY
+                        )
+
+                        val progress = p1.toFloat() / p0!!.max.toFloat()
+                        if (p2) composer.renderAtProgress(progress)
+
+                        littleBox?.draw()
+                    }
+
+                    override fun onStartTrackingTouch(p0: SeekBar?) {
+                        timeAnimator.cancel()
+                    }
+
+                    override fun onStopTrackingTouch(p0: SeekBar?) {
+
+                    }
+                })
+
+                buttonExport.setOnClickListener {
+                    val path = File(externalCacheDir, "my-video.mp4").path
+                    littleBox?.exportToVideo(path)
+                }
+            }
+        }
 
 
     }
@@ -178,26 +241,26 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
     }
 
     private fun initProgress() {
-        seekBarProgress.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
-                textViewProgress.text = HtmlCompat.fromHtml(
-                    "Progress: <strong>$p1%</strong>",
-                    HtmlCompat.FROM_HTML_MODE_LEGACY
-                )
-
-                val progress = p1.toFloat() / p0!!.max.toFloat()
-                if (p2)
-                    composer.progress = progress
-            }
-
-            override fun onStartTrackingTouch(p0: SeekBar?) {
-                timeAnimator.cancel()
-            }
-
-            override fun onStopTrackingTouch(p0: SeekBar?) {
-
-            }
-        })
+//        seekBarProgress.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+//            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+//                textViewProgress.text = HtmlCompat.fromHtml(
+//                    "Progress: <strong>$p1%</strong>",
+//                    HtmlCompat.FROM_HTML_MODE_LEGACY
+//                )
+//
+//                val progress = p1.toFloat() / p0!!.max.toFloat()
+//                if (p2)
+//                    composer.progress = progress
+//            }
+//
+//            override fun onStartTrackingTouch(p0: SeekBar?) {
+//                timeAnimator.cancel()
+//            }
+//
+//            override fun onStopTrackingTouch(p0: SeekBar?) {
+//
+//            }
+//        })
     }
 
     private fun initPhotos() {
@@ -234,7 +297,7 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
     private fun setEvents() {
         buttonChoose.setOnClickListener { choosePhotos() }
         buttonChooseAudio.setOnClickListener { chooseAudio() }
-        buttonExport.setOnClickListener { exportAsVideoFile() }
+        // buttonExport.setOnClickListener { exportAsVideoFile() }
         buttonSaveDraft.setOnClickListener { saveDraft() }
         buttonResetDraft.setOnClickListener { resetDraft() }
 
@@ -285,19 +348,18 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
     }
 
     private fun exportAsVideoFile() {
-        thread {
+//        thread {
+//            val c = composer
+//            val path = File(externalCacheDir, "my-video.mp4").path
+//            val mp4Composer = Mp4Composer(c.renderThread()?.getEglCore(), c, path,  composer.totalDuration)
+//            c.videoSize = Size(mp4Composer.width, mp4Composer.height)
+//            c.width = mp4Composer.width
+//            c.height = mp4Composer.height
+//
+//            mp4Composer.start()
+//        }
 
-            val c = composer
 
-            val path = File(externalCacheDir, "my-video.mp4").path
-            val mp4Composer = Mp4Composer(c, path,  composer.totalDuration)
-
-            c.videoSize = Size(mp4Composer.width, mp4Composer.height)
-            c.width = mp4Composer.width
-            c.height = mp4Composer.height
-
-            mp4Composer.start()
-        }
     }
 
     private fun chooseAudio() {

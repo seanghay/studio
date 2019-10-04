@@ -59,7 +59,7 @@ class MuxerRender(private val muxer: MediaMuxer) {
         }
         byteBuffer!!.flip()
         Log.v(
-            TAG, "Output format determined, writing " + sampleInfoList.size +
+            TAG, "OutputSurface format determined, writing " + sampleInfoList.size +
                     " samples / " + byteBuffer!!.limit() + " bytes to muxer."
         )
         val bufferInfo = MediaCodec.BufferInfo()

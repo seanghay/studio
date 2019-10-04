@@ -34,6 +34,7 @@ import kotlin.math.abs
 
 class VideoComposer(private val context: Context) : StudioDrawable {
 
+
     override fun renderAtProgress(progress: Float) {
         this.progress = progress
     }
@@ -101,6 +102,7 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     private val toFrameBuffer: FrameBuffer = FrameBuffer()
     private val toneCurveFrameBuffer: FrameBuffer = FrameBuffer()
 
+    fun renderThread(): StudioRenderThread? = studioRenderThread
 
     fun getTransitions() = transitions
 
@@ -258,6 +260,13 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     private inline fun postDraw(crossinline run: () -> Unit) {
         postDrawRunnables.add(Runnable { run() })
     }
+
+
+    override fun onSizeChanged(size: Size) {
+        this@VideoComposer.width = size.width
+        this@VideoComposer.height = size.height
+    }
+
 
     val surfaceTextureListener = object : TextureView.SurfaceTextureListener {
         override fun onSurfaceTextureSizeChanged(
