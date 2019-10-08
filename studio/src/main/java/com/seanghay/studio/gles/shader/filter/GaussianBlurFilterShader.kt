@@ -4,7 +4,6 @@ import com.seanghay.studio.gles.graphics.uniform.uniform2f
 import com.seanghay.studio.gles.graphics.vec2
 import com.seanghay.studio.gles.shader.TextureShader
 
-
 open class GaussianBlurFilterShader: TextureShader(fragmentShaderSource = FRAGMENT_SHADER) {
 
     var direction = vec2(0.0f, 0.0f)

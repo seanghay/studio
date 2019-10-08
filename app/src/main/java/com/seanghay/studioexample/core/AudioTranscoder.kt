@@ -8,6 +8,7 @@ import com.seanghay.studio.utils.outputBufferAt
 import android.media.MediaCodec
 import java.nio.ByteBuffer
 
+@Deprecated("Deprecated")
 class AudioTranscoder(
     private val filePath: String,
     private val outputPath: String

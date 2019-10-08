@@ -132,7 +132,6 @@ interface ToneCurveUtils {
                 (p3.y - p2.y).toDouble() / (p3.x - p2.x) - (p2.y - p1.y).toDouble() / (p2.x - p1.x)
         }
 
-
         result[0] = 0.0
         result[n - 1] = 0.0
 

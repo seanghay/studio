@@ -10,6 +10,7 @@ import android.graphics.SurfaceTexture
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.view.Menu
@@ -26,6 +27,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.room.Room
+import com.seanghay.studio.engine.AudioTranscoder
 import com.seanghay.studio.gles.shader.filter.pack.PackFilter
 import com.seanghay.studio.utils.BitmapProcessor
 import com.seanghay.studioexample.bottomsheet.FilterPackDialogFragment
@@ -40,6 +42,7 @@ import org.apache.commons.io.IOUtils
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
+import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackListener,
     QuoteDialogFragment.QuoteListener {
@@ -60,6 +63,9 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        transcodeMp3()
+
 
         quoteState = QuoteState(
             text = "Hello, World!",
@@ -95,6 +101,26 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
         isLoading.value = false
 
         launch()
+    }
+
+    private fun transcodeMp3() {
+        val file = File(Environment.getExternalStorageDirectory(), "bg.mp3")
+        val outputFile = File(Environment.getExternalStorageDirectory(), "output.m4a")
+
+        if (!file.exists()) {
+
+            Toast.makeText(this, "Mp3 does not found", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (outputFile.exists()) outputFile.delete()
+
+        thread {
+            val transcoder = AudioTranscoder(file.path, outputFile.path)
+            transcoder.setup()
+            transcoder.transcode()
+            transcoder.release()
+        }
     }
 
     private fun launch() {

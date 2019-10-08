@@ -31,7 +31,6 @@ class WarmFilterShader: TextureShader(fragmentShaderSource = FRAGMENT_SHADER) {
                 
                 gl_FragColor = textureColor;
             }
-            
         """
     }
 }

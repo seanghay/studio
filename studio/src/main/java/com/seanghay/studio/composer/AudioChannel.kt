@@ -70,13 +70,18 @@ class AudioChannel(
 
     fun feedEncoder(timeoutUs: Long): Boolean {
         val hasOverflow = overflowBuffer.data?.hasRemaining() ?: false
-        if (filledBuffers.isEmpty() && !hasOverflow) { return false }
+        if (filledBuffers.isEmpty() && !hasOverflow) {
+            return false
+        }
         val encoderInBuffIndex = encoder.dequeueInputBuffer(timeoutUs)
 
-        if (encoderInBuffIndex < 0) { return false }
+        if (encoderInBuffIndex < 0) {
+            return false
+        }
 
         // Drain overflow first
-        val outBuffer = encoder.inputBufferAt(encoderInBuffIndex)?.asShortBuffer() ?: throw RuntimeException("InputBuffer was null")
+        val outBuffer = encoder.inputBufferAt(encoderInBuffIndex)?.asShortBuffer()
+            ?: throw RuntimeException("InputBuffer was null")
         if (hasOverflow) {
             val presentationTimeUs = drainOverflow(outBuffer)
             encoder.queueInputBuffer(
