@@ -13,8 +13,8 @@
 
     <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/imageView"
-            android:layout_width="170dp"
-            android:layout_height="170dp"
+            android:layout_width="130dp"
+            android:layout_height="130dp"
             tools:src="@tools:sample/avatars" />
 
     <androidx.appcompat.widget.AppCompatImageView

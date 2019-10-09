@@ -21,6 +21,8 @@ class Mp4Composer(
     val onFinished: () -> Unit
 ) {
 
+    var onProgressChange: (Float) -> Unit = {}
+
     var width: Int = 1920
     var height: Int = 1080
 
@@ -82,7 +84,7 @@ class Mp4Composer(
                     }, {
                         exportSurface.eglSurface.setPresentationTime(computePresentationTimeNsec(i))
                     })
-
+                    onProgressChange(progress)
                     Log.d("Mp4Composer", "Generated frame: $i, Progress: $progress")
                 }
                 drainEncoder(true)

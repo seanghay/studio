@@ -28,6 +28,9 @@ class TransitionsAdapter(
         notifyItemChanged(selectedAt)
     }
 
+
+
+
     init {
         setHasStableIds(true)
     }

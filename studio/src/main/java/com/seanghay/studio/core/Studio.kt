@@ -123,7 +123,7 @@ class Studio private constructor() : DefaultLifecycleObserver {
 
 
     @GlContext
-    private fun draw() {
+    fun draw() {
         val output = outputSurface ?: return
         output.makeCurrent()
         renderContext?.onDraw()

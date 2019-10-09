@@ -18,16 +18,16 @@
 
         <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
-                app:titleTextColor="@color/colorAccent"
-                app:subtitle="by Togness"
-                app:titleTextAppearance="?textAppearanceBody1"
-                app:subtitleTextAppearance="?textAppearanceCaption"
-                app:subtitleTextColor="#000"
                 android:layout_width="match_parent"
                 android:layout_height="?actionBarSize"
                 android:theme="@style/ThemeOverlay.MaterialComponents.Toolbar.Surface"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                app:title="Studio">
+                app:subtitle="by Togness"
+                app:subtitleTextAppearance="?textAppearanceCaption"
+                app:subtitleTextColor="#000"
+                app:title="Studio"
+                app:titleTextAppearance="?textAppearanceBody1"
+                app:titleTextColor="@color/colorAccent">
 
         </com.google.android.material.appbar.MaterialToolbar>
 
@@ -182,6 +182,17 @@
 
     </com.google.android.material.card.MaterialCardView>
 
+
+    <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonDeselect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:text="Deselect All"
+            app:layout_constraintBottom_toBottomOf="@id/buttonResetDraft"
+            app:layout_constraintEnd_toStartOf="@id/buttonResetDraft"
+            app:layout_constraintTop_toTopOf="@id/buttonResetDraft" />
+
     <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonSaveDraft"
             android:layout_width="wrap_content"
@@ -199,14 +210,16 @@
             android:layout_marginTop="6dp"
             android:layout_marginEnd="16dp"
             android:text="Reset Draft"
+            android:textColor="?colorError"
             app:layout_constraintEnd_toStartOf="@id/buttonSaveDraft"
             app:layout_constraintTop_toBottomOf="@id/cardViewInfo" />
 
     <FrameLayout
             android:id="@+id/loadingLayout"
             android:layout_width="0dp"
+            android:elevation="10dp"
             android:layout_height="0dp"
-            android:background="#E6FFFFFF"
+            android:background="#F2FFFFFF"
             android:clickable="true"
             android:focusable="true"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -214,10 +227,29 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-        <ProgressBar
-                android:layout_width="wrap_content"
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="vertical">
+
+            <ProgressBar
+                    android:id="@+id/progressBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/textViewMessage"
+                    android:textColor="?colorAccent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:textAlignment="center" />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
 
     </FrameLayout>
 

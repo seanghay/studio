@@ -26,6 +26,11 @@ class SlideAdapter(var items: List<SlideEntity>) : RecyclerView.Adapter<SlideAda
         notifyItemChanged(selectedAt)
     }
 
+    fun deselectAll() {
+        selectedAt = -1
+        notifyDataSetChanged()
+    }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SlideViewHolder {
         return SlideViewHolder(LayoutInflater.from(parent.context).inflate(viewType, parent, false))

@@ -6,7 +6,11 @@ import android.opengl.GLES20.*
 import android.opengl.GLUtils
 import android.opengl.Matrix
 import android.util.Size
+import android.util.SparseArray
 import android.view.TextureView
+import androidx.core.util.contains
+import androidx.core.util.set
+import androidx.lifecycle.MutableLiveData
 import com.seanghay.studio.core.StudioDrawable
 import com.seanghay.studio.core.StudioRenderThread
 import com.seanghay.studio.gles.annotation.GlContext
@@ -34,10 +38,6 @@ import kotlin.math.abs
 
 class VideoComposer(private val context: Context) : StudioDrawable {
 
-
-    override fun renderAtProgress(progress: Float) {
-        this.progress = progress
-    }
 
     var videoSize: Size = Size(1920, 1080)
 
@@ -75,6 +75,11 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     private val quoteTexture = Texture2d()
 
 
+    // Slide Quotes
+    private val slideQuoteShader = TextureShader()
+    private val slideQuotesTextures = SparseArray<Texture2d>()
+
+
     // Kenburns Effect
     private var mvpMatrix = mat4()
     private val kenburnsMatrix = mat4()
@@ -85,6 +90,14 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     // Progression
     var progress: Float = 0f
     var totalDuration = 0L
+        set(value) {
+            field = value
+            duration.value = value
+        }
+
+
+    var duration: MutableLiveData<Long> = MutableLiveData()
+
 
     // Filters
     private val filterShader = PackFilterShader()
@@ -101,6 +114,11 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     private val fromFrameBuffer: FrameBuffer = FrameBuffer()
     private val toFrameBuffer: FrameBuffer = FrameBuffer()
     private val toneCurveFrameBuffer: FrameBuffer = FrameBuffer()
+
+
+    override fun renderAtProgress(progress: Float) {
+        this.progress = progress
+    }
 
     fun renderThread(): StudioRenderThread? = studioRenderThread
 
@@ -227,12 +245,16 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         )
 
         quoteShader.setup()
+
         quoteTexture.initialize()
         quoteTexture.use(GL_TEXTURE_2D) {
             quoteTexture.configure(GL_TEXTURE_2D)
             GLUtils.texImage2D(GL_TEXTURE_2D, 0, quoteBitmap, 0)
         }
+
+        slideQuoteShader.setup()
     }
+
 
     private fun setMatrices() {
         val ratio = (width.toFloat() / height.toFloat())
@@ -373,6 +395,14 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         quoteShader.mvpMatrix = mvpMatrix
         quoteShader.draw(quoteTexture)
 
+        slideQuoteShader.mvpMatrix = mvpMatrix
+
+        if (slideQuotesTextures.contains(seekIndex)) {
+            val tex = slideQuotesTextures[seekIndex]
+            slideQuoteShader.draw(tex)
+
+        }
+
         watermarkShader.mvpMatrix = mvpMatrix
         watermarkShader.draw(watermarkTexture)
 
@@ -465,15 +495,31 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         }
     }
 
-    fun clone(composer: VideoComposer) {
-        this.scenes.addAll(composer.scenes)
-        this.totalDuration = composer.totalDuration
-        this.preDraw {
-            this.scenes.forEach {
-                it.setup()
+
+    fun setQuoteAt(at: Int, bitmap: Bitmap) {
+        val texture = slideQuotesTextures.get(at)
+
+        if (texture == null) {
+            val texture2d = Texture2d()
+
+            preDraw {
+                texture2d.initialize()
+                texture2d.use(GL_TEXTURE_2D) {
+                    quoteTexture.configure(GL_TEXTURE_2D)
+                    GLUtils.texImage2D(GL_TEXTURE_2D, 0, bitmap, 0)
+                }
+
+                slideQuotesTextures[at] = texture2d
+            }
+
+        } else {
+            preDraw {
+                texture.use(GL_TEXTURE_2D) {
+                    quoteTexture.configure(GL_TEXTURE_2D)
+                    GLUtils.texImage2D(GL_TEXTURE_2D, 0, bitmap, 0)
+                }
             }
         }
-
-        this.defaultFilterPack = composer.defaultFilterPack
     }
+
 }
