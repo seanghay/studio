@@ -8,6 +8,7 @@ import android.opengl.Matrix
 import android.util.Size
 import android.util.SparseArray
 import android.view.TextureView
+import android.view.animation.AnticipateOvershootInterpolator
 import androidx.core.util.contains
 import androidx.core.util.set
 import androidx.lifecycle.MutableLiveData
@@ -21,6 +22,7 @@ import com.seanghay.studio.gles.graphics.mat4
 import com.seanghay.studio.gles.graphics.texture.Texture2d
 import com.seanghay.studio.gles.kenburns.Kenburns
 import com.seanghay.studio.gles.kenburns.SimpleKenburns
+import com.seanghay.studio.gles.shader.AlphaOverlayTextureShader
 import com.seanghay.studio.gles.shader.TextureShader
 import com.seanghay.studio.gles.shader.filter.PackFilterShader
 import com.seanghay.studio.gles.shader.filter.pack.PackFilter
@@ -71,12 +73,11 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     private val watermarkTexture = Texture2d()
 
     // Quotes
-    private val quoteShader = TextureShader()
+    private val quoteShader = AlphaOverlayTextureShader()
     private val quoteTexture = Texture2d()
 
-
     // Slide Quotes
-    private val slideQuoteShader = TextureShader()
+    private val slideQuoteShader = AlphaOverlayTextureShader()
     private val slideQuotesTextures = SparseArray<Texture2d>()
 
 
@@ -340,6 +341,7 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     }
 
     private val defaultPack = PackFilter()
+    private val interpolator = AnticipateOvershootInterpolator()
 
     override fun onDraw(): Boolean {
         run(preDrawRunnables)
@@ -368,7 +370,6 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         textureShader.mvpMatrix = calculateMvpMatrix(offset, seekIndex)
         textureShader.progress = interpolatedOffset
 
-
         clearColor()
         filterShader.applyPackFilter(currentScene.filter)
         fromFrameBuffer.use {
@@ -393,7 +394,12 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         quoteShader.mvpMatrix = mvpMatrix
         quoteShader.draw(quoteTexture)
 
-        slideQuoteShader.mvpMatrix = mvpMatrix
+        val slideStartOffset = calculateStartOffset(currentScene, offset)
+
+        slideQuoteShader.alpha = slideStartOffset
+        slideQuoteShader.translateY = kenburns.getValue(offset)
+        slideQuoteShader.translateX = -interpolator.getInterpolation(kenburns.getValue(offset))
+        slideQuoteShader.setMatrix(mvpMatrix)
 
         if (slideQuotesTextures.contains(seekIndex)) {
             val tex = slideQuotesTextures[seekIndex]
@@ -408,6 +414,14 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         run(postDrawRunnables)
         return true
     }
+
+    private fun calculateStartOffset(scene: Scene,  offset: Float): Float {
+        val animationDuration = 250L
+        val sceneDuration = scene.duration
+        val diff = animationDuration.toFloat() / sceneDuration.toFloat()
+        return (offset / diff).clamp(0f, 1f) * ( 1f - interpolateOffset(scene, offset))
+    }
+
 
     private fun calculateMvpMatrix(offset: Float, seekIndex: Int): Matrix4f {
         val f = seekIndex % 2
@@ -488,7 +502,6 @@ class VideoComposer(private val context: Context) : StudioDrawable {
 
     fun setQuoteAt(at: Int, bitmap: Bitmap) {
         val texture = slideQuotesTextures.get(at)
-
         if (texture == null) {
             val texture2d = Texture2d()
 

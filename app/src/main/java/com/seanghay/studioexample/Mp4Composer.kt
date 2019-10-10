@@ -145,7 +145,7 @@ class Mp4Composer(
                 }
                 drainEncoder(true)
 
-                decode(audioDecoder!!, audioExtractor)
+                // decode(audioDecoder!!, audioExtractor)
 
                 release()
                 onFinished()

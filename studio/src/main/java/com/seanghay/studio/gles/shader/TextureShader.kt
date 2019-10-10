@@ -67,7 +67,7 @@ open class TextureShader(override var vertexShaderSource: String = VERTEX_SHADER
     open fun beforeDrawVertices() {}
     open fun afterDrawVertices() {}
 
-    protected fun writeUniforms() {
+    protected open fun writeUniforms() {
         flipVerticalUniform.setValue(isFlipVertical)
         flipHorizontalUniform.setValue(isFlipHorizontal)
         mvpMatrixUniform.setValue(mvpMatrix)
