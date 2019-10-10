@@ -5,14 +5,15 @@ import android.os.Build
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil
 import com.seanghay.studio.internal.logger
 import java.nio.ByteBuffer
-import java.util.concurrent.TimeUnit
-import kotlin.math.floor
 
 @Suppress("Unused")
-class AudioTranscoder(audioPath: String, outputPath: String) {
+class AudioTranscoder(
+    audioPath: String,
+    outputPath: String
+) {
 
-    private var trimStartUs = 0L
-    private var trimEndUs = Long.MAX_VALUE
+    var trimStartUs = 0L
+    var trimEndUs = Long.MAX_VALUE
 
     private val logger = logger()
     private var extractor: MediaExtractor = MediaExtractor()
@@ -96,7 +97,13 @@ class AudioTranscoder(audioPath: String, outputPath: String) {
 
                     if (extractor.sampleTime >= trimEndUs) {
                         logger.d("[trim] extractor reached end of stream")
-                        codec.queueInputBuffer(inIndex, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
+                        codec.queueInputBuffer(
+                            inIndex,
+                            0,
+                            0,
+                            0,
+                            MediaCodec.BUFFER_FLAG_END_OF_STREAM
+                        )
                         continue
                     }
 

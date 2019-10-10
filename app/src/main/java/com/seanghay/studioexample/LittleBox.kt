@@ -18,8 +18,6 @@ class LittleBox(
 ) {
 
     var playProgress: (Float) -> Unit = {}
-
-
     var isPlaying = false
         private set
 
@@ -127,6 +125,7 @@ class LittleBox(
 
     fun exportToVideo(
         path: String,
+        audioPath: String?,
         progress: ((Float) -> Unit) = {},
         done: () -> Unit = {}
     ) {
@@ -139,6 +138,7 @@ class LittleBox(
             studio.setOutputSurface(display)
         }
 
+        mp4Composer.audioPath = audioPath
         mp4Composer.onProgressChange = progress
         mp4Composer.width = composer.width
         mp4Composer.height = composer.height

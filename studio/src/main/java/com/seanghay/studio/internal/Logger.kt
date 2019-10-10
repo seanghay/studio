@@ -5,11 +5,11 @@ import androidx.annotation.IntDef
 
 
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun Any.logger(): Logger {
+inline fun Any.logger(): Logger {
     return Logger(this.javaClass.simpleName)
 }
 
-internal class Logger(var tag: String) {
+class Logger(var tag: String) {
 
     @LogLevel
     var level: Int = LOG_VERBOSE

@@ -241,17 +241,15 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     private fun setupQuoteShader() {
         val quoteBitmap = TextBitmap.quoteBitmap(
             context,
-            "ខ្ញុំបានមើលព្យុះ ដែលមានភាពស្រស់ស្អាតណាស់ ប៉ុន្តែគួរឲ្យខ្លាច"
+            ""
         )
 
         quoteShader.setup()
-
         quoteTexture.initialize()
         quoteTexture.use(GL_TEXTURE_2D) {
             quoteTexture.configure(GL_TEXTURE_2D)
             GLUtils.texImage2D(GL_TEXTURE_2D, 0, quoteBitmap, 0)
         }
-
         slideQuoteShader.setup()
     }
 
@@ -378,7 +376,7 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         }
 
         clearColor()
-        filterShader.applyPackFilter(currentScene.filter)
+        filterShader.applyPackFilter(nextScene?.filter ?: defaultPack)
 
         toFrameBuffer.use {
             filterShader.draw(nextTexture)
@@ -400,22 +398,14 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         if (slideQuotesTextures.contains(seekIndex)) {
             val tex = slideQuotesTextures[seekIndex]
             slideQuoteShader.draw(tex)
-
         }
 
         watermarkShader.mvpMatrix = mvpMatrix
         watermarkShader.draw(watermarkTexture)
 
-
 //        toneCurveFilterShader.mvpMatrix = mvpMatrix
 //        toneCurveFilterShader.draw(toneCurveFrameBuffer.toTexture())
-
-        try {
-            run(postDrawRunnables)
-            Thread.sleep(10)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        run(postDrawRunnables)
         return true
     }
 

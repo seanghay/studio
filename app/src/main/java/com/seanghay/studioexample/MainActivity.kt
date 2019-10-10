@@ -379,7 +379,9 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
         textViewMessage.text = "Preparing for export..."
 
         val path = File(externalCacheDir, "my-video-${System.currentTimeMillis()}.mp4").path
-        littleBox?.exportToVideo(path, {
+        val audioPath = audio?.path
+
+        littleBox?.exportToVideo(path, audioPath, {
             runOnUiThread {
                 textViewMessage.text = "Exporting (${formatPercent(it)}%)"
             }
@@ -460,7 +462,6 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
             val compressedFile = compressor.setQuality(40)
                 .setCompressFormat(Bitmap.CompressFormat.JPEG)
                 .compressToFile(file, "photos-${UUID.randomUUID()}.jpg")
-
             SlideEntity(compressedFile.path)
         })
 
