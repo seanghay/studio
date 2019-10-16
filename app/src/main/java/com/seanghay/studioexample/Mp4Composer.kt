@@ -3,6 +3,8 @@ package com.seanghay.studioexample
 import android.media.*
 import android.media.MediaCodec.*
 import android.os.Build
+import android.os.Handler
+import android.os.HandlerThread
 import android.util.Log
 import android.view.Surface
 import com.seanghay.studio.core.Studio
@@ -19,7 +21,6 @@ class Mp4Composer(
     private val duration: Long,
     val onFinished: () -> Unit
 ) {
-
 
     private val logger = logger()
 
@@ -124,6 +125,7 @@ class Mp4Composer(
 
     fun start() {
         try {
+            logger.d("MuxHandler: started")
             // val file = File(outputPath)
             // if (file.exists()) file.delete()
             val exportSurface = studio.createOutputSurface()
@@ -143,15 +145,11 @@ class Mp4Composer(
                     onProgressChange(progress)
                     Log.d("Mp4Composer", "Generated frame: $i, Progress: $progress")
                 }
+
                 drainEncoder(true)
-
-                // decode(audioDecoder!!, audioExtractor)
-
                 release()
                 onFinished()
-
             }
-
         } finally {
             // release()
         }
@@ -204,8 +202,9 @@ class Mp4Composer(
 
                     encodedData.position(bufferInfo.offset)
                     encodedData.limit(bufferInfo.offset + bufferInfo.size)
-
                     muxer!!.writeSampleData(trackIndex, encodedData, bufferInfo)
+                    logger.d("Muxer: sent data to Muxer")
+
                     Log.d("Mp4Composer", "sent " + bufferInfo.size + " bytes to muxer")
                 }
 
@@ -398,6 +397,21 @@ class Mp4Composer(
         }
     }
 
+
+    class MuxerHandler : HandlerThread("MuxerHandler") {
+        private lateinit var handler: Handler
+
+        override fun start() {
+            super.start()
+            handler = Handler(looper)
+        }
+
+        fun post(runnable: Runnable) {
+            getHandler().post(runnable)
+        }
+
+        fun getHandler(): Handler = handler
+    }
 
     companion object {
         // Have no idea what is it for

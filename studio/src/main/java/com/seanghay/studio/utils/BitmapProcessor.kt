@@ -2,8 +2,8 @@ package com.seanghay.studio.utils
 
 import android.graphics.*
 import android.media.ExifInterface
-import androidx.core.graphics.plus
 import com.seanghay.studio.utils.BitmapProcessor.CropType.*
+import io.reactivex.Single
 import java.io.IOException
 
 class BitmapProcessor(private val source: Bitmap) {
@@ -34,14 +34,21 @@ class BitmapProcessor(private val source: Bitmap) {
         this.scaledHeight = height
     }
 
-    fun proceed(): Bitmap {
+    fun proceed(): Single<Bitmap> {
+        return Single.create {
+            it.onSuccess(proceedSync())
+        }
+    }
+
+
+    fun proceedSync(): Bitmap {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.color = Color.RED
 
         val bitmap = Bitmap.createBitmap(scaledWidth, scaledHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
-        val (dstRect: Rect, fill: Boolean) =  when(cropType) {
+        val (dstRect: Rect, fill: Boolean) = when (cropType) {
             FIT_CENTER -> fitCenterRect() to false
             FIT_START -> fitStartRect() to false
             FIT_END -> fitEndRect() to false
@@ -51,7 +58,7 @@ class BitmapProcessor(private val source: Bitmap) {
         }
 
         if (!fill) {
-            val  bgPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+            val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG)
             val colorMatrix = ColorMatrix()
             colorMatrix.setSaturation(.5f)
             val colorFilter = ColorMatrixColorFilter(colorMatrix)
@@ -109,7 +116,7 @@ class BitmapProcessor(private val source: Bitmap) {
         val ratio = width.toFloat() / height.toFloat()
         val right = (scaledHeight * ratio).toInt()
         val left = scaledWidth - right
-        return Rect(left , 0, scaledWidth, scaledHeight)
+        return Rect(left, 0, scaledWidth, scaledHeight)
     }
 
     private fun fitCenterRect(): Rect {
@@ -133,19 +140,55 @@ class BitmapProcessor(private val source: Bitmap) {
         FIT_END,
         FILL_CENTER,
         FILL_START,
-        FILL_END
+        FILL_END;
+
+        fun key(): String {
+            return when (this) {
+                FIT_CENTER -> "fit-center"
+                FIT_START -> "fit-start"
+                FIT_END -> "fit-end"
+                FILL_CENTER -> "fill-center"
+                FILL_START -> "fill-start"
+                FILL_END -> "fill-end"
+            }
+        }
+
+        companion object {
+            fun fromKey(key: String): CropType {
+                return when (key) {
+                    "fit-center" -> FIT_CENTER
+                    "fit-start" -> FIT_START
+                    "fit-end" -> FIT_END
+                    "fill-center" -> FILL_CENTER
+                    "fill-start" -> FILL_START
+                    "fill-end" -> FILL_END
+                    else -> throw RuntimeException()
+                }
+            }
+        }
     }
 
 
     companion object {
-        fun load(filePath: String): Bitmap {
+
+        fun loadSync(filePath: String): Bitmap {
             val b = BitmapFactory.decodeFile(filePath)
             val exif = ExifInterface(filePath)
-            val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+            val orientation = exif.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
+            )
             val rotationInDegrees = exifToDegrees(orientation)
             val matrix = Matrix()
             if (rotationInDegrees != 0) matrix.preRotate(rotationInDegrees.toFloat())
             return Bitmap.createBitmap(b, 0, 0, b.width, b.height, matrix, true)
+        }
+
+
+        fun load(filePath: String): Single<Bitmap> {
+            return Single.create {
+                it.onSuccess(loadSync(filePath))
+            }
         }
 
         private fun exifToDegrees(exifOrientation: Int): Int = when (exifOrientation) {
@@ -154,5 +197,6 @@ class BitmapProcessor(private val source: Bitmap) {
             ExifInterface.ORIENTATION_ROTATE_270 -> 270
             else -> 0
         }
+
     }
 }

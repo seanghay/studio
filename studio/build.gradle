@@ -33,6 +33,10 @@ dependencies {
     implementation 'com.google.android.exoplayer:exoplayer-core:2.10.2'
     api 'androidx.lifecycle:lifecycle-common-java8:2.1.0'
 
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.9'
+    implementation "io.reactivex.rxjava2:rxkotlin:2.3.0"
+
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'

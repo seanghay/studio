@@ -1,7 +1,10 @@
 package com.seanghay.studioexample
 
+import android.Manifest.permission.READ_EXTERNAL_STORAGE
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.SurfaceTexture
@@ -19,6 +22,7 @@ import android.view.View
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.text.HtmlCompat
 import androidx.core.util.set
 import androidx.lifecycle.MutableLiveData
@@ -31,11 +35,20 @@ import com.seanghay.studio.gles.shader.filter.pack.PackFilter
 import com.seanghay.studio.utils.BitmapProcessor
 import com.seanghay.studioexample.bottomsheet.FilterPackDialogFragment
 import com.seanghay.studioexample.bottomsheet.QuoteDialogFragment
+import com.seanghay.studioexample.bottomsheet.SceneOptionsBottomSheet
+import com.seanghay.studioexample.dao.md5
+import com.seanghay.studioexample.picasso.NewPicassoEngine
 import com.seanghay.studioexample.sticker.QuoteState
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
-import com.zhihu.matisse.engine.impl.PicassoEngine
 import id.zelory.compressor.Compressor
+import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import org.apache.commons.io.IOUtils
 import java.io.File
@@ -45,7 +58,8 @@ import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackListener,
-    QuoteDialogFragment.QuoteListener {
+    QuoteDialogFragment.QuoteListener, SceneOptionsBottomSheet.SceneOptionStateListener {
+
 
     private val slides = arrayListOf<SlideEntity>()
     private val slideAdapter: SlideAdapter = SlideAdapter(slides)
@@ -60,8 +74,9 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
 
     private val quoteStatePool = SparseArray<QuoteState>()
     private lateinit var quoteState: QuoteState
-
     private var littleBox: LittleBox? = null
+
+    private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,7 +112,6 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
         setEvents()
         initPhotos()
         initAudio()
-
 
         launch()
         initDurations()
@@ -226,6 +240,36 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
         dispatchDraw()
     }
 
+    override fun onStateChange(state: SceneOptionsBottomSheet.OptionState) {
+        if (state.delete) {
+            composer.removeScene(state.id, ::dispatchDraw)
+            slides.find { it.path.md5() == state.id }?.let {
+                val index = slides.indexOf(it)
+                slides.remove(it)
+                slideAdapter.notifyItemRemoved(index)
+            }
+            dispatchDraw()
+            return
+        }
+
+        val scene = composer.getScenes().find { it.id == state.id } ?: return
+        scene.duration = state.duration
+        composer.evaluateDuration()
+        dispatchDraw()
+
+        composer.updateSceneCropType(state.id, BitmapProcessor.CropType.fromKey(state.crop!!))
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { isLoading.postValue(true) }
+            .doOnSuccess { isLoading.postValue(false) }
+            .subscribeBy(onError = {
+                Toast.makeText(this, "Error while setting crop type", Toast.LENGTH_SHORT).show()
+            }) {
+                dispatchDraw()
+            }.willBeDisposed()
+
+    }
+
 
     override fun onFilterPackSaved(filterPack: PackFilter) {
         if (slideAdapter.selectedAt != -1) {
@@ -291,8 +335,17 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
             dispatchDraw()
         }
 
-    }
 
+        transitionAdapter.onLongPressed = {
+            val transition = transitions[transitionAdapter.selectedAt]
+            composer.getScenes().forEach {
+                it.transition = transition
+            }
+            Toast.makeText(this, "Applied transitions for all slides", Toast.LENGTH_SHORT).show()
+            dispatchDraw()
+        }
+
+    }
 
     private fun initAudio() {
         if (audio != null) return
@@ -300,12 +353,33 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
         setAudio(audioDb)
     }
 
+    private fun dispatchUpdates() {
+        val paths = slides.filter { File(it.path).exists() }
+
+        Single.just(paths)
+            .map {
+                it.map { item -> item.path to BitmapProcessor.loadSync(item.path) }
+            }
+            .toObservable().switchMap { composer.setScenes(it).toObservable() }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnComplete { isLoading.postValue(false) }
+            .doOnSubscribe { isLoading.postValue(true) }
+            .subscribeBy(onError = {
+                Toast.makeText(this, "Error while loading slides", Toast.LENGTH_SHORT).show()
+            }) {
+                Toast.makeText(this, "Slides loaded", Toast.LENGTH_SHORT).show()
+                dispatchDraw()
+            }.willBeDisposed()
+    }
+
     private fun initPhotos() {
+
         if (slides.isEmpty()) {
             val fromDb = appDatabase.slideDao().getAll()
-            if (fromDb.isNotEmpty()) slides.addAll(fromDb)
+            fromDb.filter { !File(it.path).exists() }.forEach(appDatabase.slideDao()::delete)
+            slides.addAll(fromDb.filter { File(it.path).exists() })
         }
-
 
         recyclerView.let {
             it.adapter = slideAdapter
@@ -313,8 +387,7 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
             (it.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         }
 
-        val bitmaps = slides.map { it.path to BitmapProcessor.load(it.path) }.toTypedArray()
-        composer.insertScenes(*bitmaps)
+        dispatchUpdates()
 
         slideAdapter.selectionChange = {
             val sceneIndex = slideAdapter.selectedAt
@@ -331,6 +404,28 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
                     recyclerViewTransitions.smoothScrollToPosition(indexOf)
                 }
             }
+        }
+
+        slideAdapter.onLongPress = {
+            val sceneIndex = slideAdapter.selectedAt
+            if (sceneIndex >= 0) {
+                val scene = composer.getScenes()[sceneIndex]
+
+                val state = SceneOptionsBottomSheet.OptionState(
+                    id = scene.id,
+                    duration = scene.duration,
+                    crop = scene.cropType.key()
+                )
+
+                SceneOptionsBottomSheet
+                    .newInstance(state)
+                    .show(
+                        supportFragmentManager,
+                        "scene-options"
+                    )
+            }
+
+
         }
 
         buttonDeselect.setOnClickListener {
@@ -354,6 +449,12 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
             }
         }
     }
+
+
+    private fun Disposable.willBeDisposed() {
+        addTo(compositeDisposable)
+    }
+
 
     private fun resetDraft() {
         appDatabase.slideDao().deleteAll()
@@ -389,9 +490,22 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
             runOnUiThread {
                 textViewMessage.text = "Completed"
                 isLoading.value = false
+                saveAsStory(path)
                 play(path)
+
             }
         }
+    }
+
+    private fun saveAsStory(path: String) {
+        val storyEntity = StoryEntity(
+            title = "My Story",
+            path = path,
+            createdAt = System.currentTimeMillis()
+        )
+
+        appDatabase.storyDao().insert(storyEntity)
+        Toast.makeText(this, "Saved to stories", Toast.LENGTH_SHORT).show()
     }
 
     private fun chooseAudio() {
@@ -401,23 +515,57 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
     }
 
     private fun choosePhotos() {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            showPhotoChooser()
+        } else {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, READ_EXTERNAL_STORAGE)) {
+                Toast.makeText(this, "Permission required please enable it!", Toast.LENGTH_SHORT)
+                    .show()
+            } else ActivityCompat.requestPermissions(
+                this,
+                arrayOf(READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE),
+                3
+            )
+        }
+
+    }
+
+    private fun showPhotoChooser() {
         Matisse.from(this)
             .choose(MimeType.ofImage())
             .maxSelectable(30)
             .theme(R.style.Matisse_Dracula)
             .countable(true)
-            .imageEngine(PicassoEngine())
+            .imageEngine(NewPicassoEngine())
             .forResult(0)
     }
 
 
     override fun onDestroy() {
         super.onDestroy()
+        compositeDisposable.clear()
         composer.release()
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == 3 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            showPhotoChooser()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
         if (requestCode == 0 && resultCode == Activity.RESULT_OK) {
             val items = Matisse.obtainResult(data)
             applyData(items)
@@ -454,19 +602,26 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
     }
 
     private fun applyData(items: List<Uri>) {
-        slides.addAll(items.map {
-            val inputStream = contentResolver.openInputStream(it)
-            val file = File.createTempFile("filename", null, cacheDir)
-            val fileOutputStream = FileOutputStream(file)
-            IOUtils.copy(inputStream, fileOutputStream)
-            val compressedFile = compressor.setQuality(40)
-                .setCompressFormat(Bitmap.CompressFormat.JPEG)
-                .compressToFile(file, "photos-${UUID.randomUUID()}.jpg")
-            SlideEntity(compressedFile.path)
-        })
-
-        slideAdapter.notifyDataSetChanged()
-        dispatchDraw()
+        Single.just(items)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .map { items ->
+                items.map {
+                    val inputStream = contentResolver.openInputStream(it)
+                    val file = File.createTempFile("filename", null, cacheDir)
+                    val fileOutputStream = FileOutputStream(file)
+                    IOUtils.copy(inputStream, fileOutputStream)
+                    val compressedFile = compressor.setQuality(40)
+                        .setCompressFormat(Bitmap.CompressFormat.JPEG)
+                        .compressToFile(file, "photos-${UUID.randomUUID()}.jpg")
+                    SlideEntity(compressedFile.path)
+                }
+            }.subscribeBy {
+                slides.addAll(it)
+                slideAdapter.notifyDataSetChanged()
+                dispatchUpdates()
+                dispatchDraw()
+            }.willBeDisposed()
     }
 
 

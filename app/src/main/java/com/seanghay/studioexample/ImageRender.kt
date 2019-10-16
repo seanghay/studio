@@ -16,7 +16,6 @@ class ImageRender(
     var width: Int = -1,
     var height: Int = -1
 ) {
-
     private var textureShader = TransitionalTextureShader(DirectionalwarpTransition())
 
     private val transitions = arrayOf(

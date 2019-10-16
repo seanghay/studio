@@ -13,6 +13,8 @@ class TransitionsAdapter(
 
 
     var selectionChange: () -> Unit = {}
+    var onLongPressed: () -> Unit = {}
+
 
     var selectedAt = -1
         set(value) {
@@ -55,13 +57,21 @@ class TransitionsAdapter(
 
     override fun getItemCount(): Int = items.size
 
-
+    private fun longPressFired() {
+        onLongPressed()
+    }
 
     inner class TransitionViewHolder(view: View): RecyclerView.ViewHolder(view) {
 
         init {
             itemView.setOnClickListener {
                 select(adapterPosition)
+            }
+
+            itemView.setOnLongClickListener {
+                select(adapterPosition)
+                longPressFired()
+                true
             }
         }
 

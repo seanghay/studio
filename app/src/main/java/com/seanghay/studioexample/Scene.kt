@@ -8,13 +8,20 @@ import com.seanghay.studio.gles.graphics.texture.Texture2d
 import com.seanghay.studio.gles.shader.filter.pack.PackFilter
 import com.seanghay.studio.gles.transition.FadeTransition
 import com.seanghay.studio.gles.transition.Transition
+import com.seanghay.studio.utils.BitmapProcessor
 
-class Scene(var bitmap: Bitmap) {
+class Scene(
+    var id: String,
+    var bitmap: Bitmap,
+    var originalPath: String
+) {
 
     var duration: Long = 4000L
     var transition: Transition = FadeTransition("fade", 1000L)
     var texture: Texture2d = Texture2d()
     var filter = PackFilter()
+    var cropType: BitmapProcessor.CropType = BitmapProcessor.CropType.FILL_CENTER
+
 
     @GlContext
     fun setup() {
@@ -27,6 +34,7 @@ class Scene(var bitmap: Bitmap) {
 
     @GlContext
     fun release() {
+
         texture.release()
     }
 

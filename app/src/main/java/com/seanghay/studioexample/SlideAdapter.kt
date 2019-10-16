@@ -11,6 +11,8 @@ import java.io.File
 class SlideAdapter(var items: List<SlideEntity>) : RecyclerView.Adapter<SlideAdapter.SlideViewHolder>() {
 
     var selectionChange: () -> Unit = {}
+    var onLongPress: () -> Unit = {}
+
 
     var selectedAt = -1
         set(value) {
@@ -48,17 +50,27 @@ class SlideAdapter(var items: List<SlideEntity>) : RecyclerView.Adapter<SlideAda
         holder.bind(items[position])
     }
 
+    private fun fireLongPress() {
+        onLongPress()
+    }
+
     inner class SlideViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
         init {
             itemView.setOnClickListener {
                 select(adapterPosition)
             }
+
+            itemView.setOnLongClickListener {
+                select(adapterPosition)
+                fireLongPress()
+                true
+            }
         }
 
         fun bind(item: SlideEntity) {
             itemView.isSelected = selectedAt == adapterPosition
-            Picasso.with(itemView.context)
+            Picasso.get()
                 .load(File(item.path))
                 .fit()
                 .centerCrop()

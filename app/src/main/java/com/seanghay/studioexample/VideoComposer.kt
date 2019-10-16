@@ -35,6 +35,7 @@ import com.seanghay.studio.utils.BitmapProcessor
 import com.seanghay.studio.utils.clamp
 import com.seanghay.studio.utils.smoothStep
 import com.seanghay.studioexample.dao.md5
+import io.reactivex.Single
 import java.util.*
 import kotlin.math.abs
 
@@ -93,7 +94,7 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     var totalDuration = 0L
         set(value) {
             field = value
-            duration.value = value
+            duration.postValue(value)
         }
 
 
@@ -127,26 +128,95 @@ class VideoComposer(private val context: Context) : StudioDrawable {
 
     fun getScenes(): List<Scene> = scenes
 
-    fun insertScenes(vararg bitmaps: Pair<String, Bitmap>) {
-        for ((path, bitmap) in bitmaps) {
-            val hash = path.md5()
+    fun removeScene(id: String, done: () -> Unit) {
+        val scene = scenes.find { it.id == id } ?: return
+        postDraw {
+            scene.release()
+            scenes.remove(scene)
+            evaluateDuration()
+            done()
+        }
+    }
 
-            val scaledBitmap: Bitmap = if (bitmapCache.contains(hash)) {
-                bitmapCache.get(hash)!!
+    fun updateSceneCropType(
+        id: String,
+        cropType: BitmapProcessor.CropType
+    ): Single<Bitmap> {
+        return Single.create {
+
+            val scene = scenes.find { it.id == id }
+
+            if (scene == null) {
+                it.onError(IllegalStateException())
+                return@create
+            }
+
+            if (scene.cropType == cropType) {
+                it.onSuccess(scene.bitmap)
+                return@create
+            }
+
+            val hash = scene.id
+            val scaledBitmap: Bitmap = if (bitmapCache.contains(hash + cropType.key())) {
+                bitmapCache.get(hash + cropType.key())!!
             } else {
-                val bitmapProcessor = BitmapProcessor(bitmap)
+                val original = BitmapProcessor.loadSync(scene.originalPath)
+                val bitmapProcessor = BitmapProcessor(original)
                 bitmapProcessor.crop(videoSize.width, videoSize.height)
-                bitmapProcessor.cropType(BitmapProcessor.CropType.FIT_CENTER)
-                val bmp = bitmapProcessor.proceed()
-                bitmapCache.set(hash, bmp)
+                bitmapProcessor.cropType(cropType)
+                val bmp = bitmapProcessor.proceedSync()
+                bitmapCache.set(hash + cropType.key(), bmp)
+                original.recycle()
                 bmp
             }
 
-            val scene = Scene(scaledBitmap)
-            scenes.add(scene)
+            scene.bitmap.recycle()
+            scene.bitmap = scaledBitmap
+            scene.cropType = cropType
+            it.onSuccess(scaledBitmap)
 
-            preDraw { scene.setup() }
-            totalDuration += scene.duration
+            preDraw {
+                scene.setup()
+            }
+        }
+    }
+
+    fun setScenes(bitmaps: List<Pair<String, Bitmap>>): Single<Boolean> {
+        return Single.create<Boolean> {
+
+            val cropType = BitmapProcessor.CropType.FIT_CENTER
+
+            for ((path, bitmap) in bitmaps) {
+                val hash = path.md5()
+
+                // Skip if it's already added
+                if (scenes.any { item -> item.id == hash }) continue
+
+                val scaledBitmap: Bitmap = if (bitmapCache.contains(hash + cropType.key())) {
+                    bitmapCache.get(hash + cropType.key())!!
+                } else {
+                    val bitmapProcessor = BitmapProcessor(bitmap)
+                    bitmapProcessor.crop(videoSize.width, videoSize.height)
+                    bitmapProcessor.cropType(cropType)
+                    val bmp = bitmapProcessor.proceedSync()
+                    bitmapCache.set(hash + cropType.key(), bmp)
+                    bmp
+                }
+
+                val scene = Scene(hash, scaledBitmap, path)
+                scenes.add(scene)
+                preDraw { scene.setup() }
+            }
+
+            evaluateDuration()
+            it.onSuccess(true)
+        }
+    }
+
+    fun evaluateDuration() {
+        totalDuration = 0L
+        scenes.forEach {
+            totalDuration += it.duration
         }
 
         var last = 0L
@@ -415,11 +485,11 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         return true
     }
 
-    private fun calculateStartOffset(scene: Scene,  offset: Float): Float {
+    private fun calculateStartOffset(scene: Scene, offset: Float): Float {
         val animationDuration = 250L
         val sceneDuration = scene.duration
         val diff = animationDuration.toFloat() / sceneDuration.toFloat()
-        return (offset / diff).clamp(0f, 1f) * ( 1f - interpolateOffset(scene, offset))
+        return (offset / diff).clamp(0f, 1f) * (1f - interpolateOffset(scene, offset))
     }
 
 
