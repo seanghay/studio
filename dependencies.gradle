@@ -2,8 +2,8 @@ ext.versions = [
         minSdk            : 16,
         compileSdk        : 29,
         buildTools        : '29.0.0',
-        publishVersion    : '1.0.0-alpha02',
-        publishVersionCode: 17,
+        publishVersion    : '1.0.0-alpha03',
+        publishVersionCode: 18,
 
         gradlePlugin      : '3.5.1',
         spotlessPlugin    : '3.24.3',
@@ -14,7 +14,7 @@ ext.versions = [
         androidx          : '1.1.0',
         constraintLayout  : '1.1.3',
         recyclerView      : '1.0.0',
-        material          : '1.0.0',
+        material          : '1.1.0-beta01',
 
         // Unit testing
         junit             : '4.12',
