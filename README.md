@@ -10,6 +10,6 @@ A studio for video editor.
 
 ```gradle
 dependencies {
-   implementation 'com.seanghay:studio:11.0.0-alpha02'
+   implementation 'com.seanghay:studio:1.0.0-alpha04'
 }
 ```
