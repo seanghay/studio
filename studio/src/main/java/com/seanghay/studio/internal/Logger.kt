@@ -1,8 +1,22 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studio.internal
 
 import android.util.Log
 import androidx.annotation.IntDef
-
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Any.logger(): Logger {
@@ -19,7 +33,6 @@ class Logger(var tag: String) {
     fun e(message: String, throwable: Throwable? = null) = log(LOG_ERROR, tag, message, throwable)
     fun d(message: String, throwable: Throwable? = null) = log(LOG_DEBUG, tag, message, throwable)
 
-
     @IntDef(LOG_VERBOSE, LOG_INFO, LOG_WARNING, LOG_ERROR, LOG_DEBUG)
     @Retention(AnnotationRetention.SOURCE)
     annotation class LogLevel
@@ -32,9 +45,10 @@ class Logger(var tag: String) {
         const val LOG_DEBUG = 4
 
         private fun log(
-            @LogLevel level: Int, tag: String,
-            message: String,
-            throwable: Throwable? = null
+          @LogLevel level: Int,
+          tag: String,
+          message: String,
+          throwable: Throwable? = null
         ) {
             when (level) {
                 LOG_VERBOSE -> Log.v(tag, message, throwable)

@@ -1,3 +1,18 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studioexample
 
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
@@ -53,13 +68,12 @@ import kotlinx.android.synthetic.main.activity_main.*
 import org.apache.commons.io.IOUtils
 import java.io.File
 import java.io.FileOutputStream
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackListener,
     QuoteDialogFragment.QuoteListener, SceneOptionsBottomSheet.SceneOptionStateListener {
-
 
     private val slides = arrayListOf<SlideEntity>()
     private val slideAdapter: SlideAdapter = SlideAdapter(slides)
@@ -119,7 +133,6 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
         isLoading.value = false
     }
 
-
     private fun initDurations() {
         composer.duration.observe(this, Observer {
             textViewDuration.setText("Total duration: " + formatDuration(it))
@@ -141,7 +154,6 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
             )
         )
     }
-
 
     private fun transcodeMp3() {
         val file = File(Environment.getExternalStorageDirectory(), "bg.mp3")
@@ -167,9 +179,9 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
 
         textureView.surfaceTextureListener = object : TextureView.SurfaceTextureListener {
             override fun onSurfaceTextureSizeChanged(
-                surface: SurfaceTexture?,
-                width: Int,
-                height: Int
+              surface: SurfaceTexture?,
+              width: Int,
+              height: Int
             ) {
                 littleBox?.resize(width, height)
             }
@@ -183,9 +195,9 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
             }
 
             override fun onSurfaceTextureAvailable(
-                surface: SurfaceTexture?,
-                width: Int,
-                height: Int
+              surface: SurfaceTexture?,
+              width: Int,
+              height: Int
             ) {
                 if (surface == null) return
                 littleBox = LittleBox(this@MainActivity, surface, width, height)
@@ -214,10 +226,8 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
                     }
 
                     override fun onStopTrackingTouch(p0: SeekBar?) {
-
                     }
                 })
-
             }
         }
     }
@@ -231,7 +241,6 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
         this.quoteState = quoteState
         dispatchDraw()
     }
-
 
     override fun onReceiveQuoteBitmap(bitmap: Bitmap) {
         if (slideAdapter.selectedAt != -1) {
@@ -267,9 +276,7 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
             }) {
                 dispatchDraw()
             }.willBeDisposed()
-
     }
-
 
     override fun onFilterPackSaved(filterPack: PackFilter) {
         if (slideAdapter.selectedAt != -1) {
@@ -335,7 +342,6 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
             dispatchDraw()
         }
 
-
         transitionAdapter.onLongPressed = {
             val transition = transitions[transitionAdapter.selectedAt]
             composer.getScenes().forEach {
@@ -344,7 +350,6 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
             Toast.makeText(this, "Applied transitions for all slides", Toast.LENGTH_SHORT).show()
             dispatchDraw()
         }
-
     }
 
     private fun initAudio() {
@@ -424,8 +429,6 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
                         "scene-options"
                     )
             }
-
-
         }
 
         buttonDeselect.setOnClickListener {
@@ -450,11 +453,9 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
         }
     }
 
-
     private fun Disposable.willBeDisposed() {
         addTo(compositeDisposable)
     }
-
 
     private fun resetDraft() {
         appDatabase.slideDao().deleteAll()
@@ -469,11 +470,9 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
         Toast.makeText(this, "Draft Saved", Toast.LENGTH_SHORT).show()
     }
 
-
     private fun formatPercent(value: Float): String {
         return "%.2f".format(value * 100f)
     }
-
 
     private fun exportAsVideoFile() {
         isLoading.value = true
@@ -492,7 +491,6 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
                 isLoading.value = false
                 saveAsStory(path)
                 play(path)
-
             }
         }
     }
@@ -531,7 +529,6 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
                 3
             )
         }
-
     }
 
     private fun showPhotoChooser() {
@@ -544,7 +541,6 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
             .forResult(0)
     }
 
-
     override fun onDestroy() {
         super.onDestroy()
         compositeDisposable.clear()
@@ -552,9 +548,9 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
+      requestCode: Int,
+      permissions: Array<out String>,
+      grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
@@ -624,7 +620,6 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
             }.willBeDisposed()
     }
 
-
     private fun play(path: String) {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(path))
         intent.setDataAndType(Uri.parse(path), "video/mp4")
@@ -651,9 +646,4 @@ class MainActivity : AppCompatActivity(), FilterPackDialogFragment.FilterPackLis
                 else View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         }
     }
-
 }
-
-
-
-

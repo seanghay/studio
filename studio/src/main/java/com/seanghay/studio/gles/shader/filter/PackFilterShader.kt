@@ -1,3 +1,18 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studio.gles.shader.filter
 
 import android.graphics.PointF
@@ -16,7 +31,9 @@ import com.seanghay.studio.gles.shader.filter.tonecurve.ToneCurveUtils
 import java.io.IOException
 import java.io.InputStream
 import java.nio.ByteBuffer
-import java.util.*
+import java.util.ArrayList
+import java.util.LinkedList
+import java.util.Queue
 
 open class PackFilterShader : TextureShader(fragmentShaderSource = FRAGMENT_SHADER),
     ToneCurveUtils {
@@ -33,7 +50,6 @@ open class PackFilterShader : TextureShader(fragmentShaderSource = FRAGMENT_SHAD
         PointF(0.5f, 0.5f),
         PointF(1.0f, 1.0f)
     )
-
 
     private var rgbCompositeControlPoints: Array<PointF>
     private var redControlPoints: Array<PointF>
@@ -80,7 +96,6 @@ open class PackFilterShader : TextureShader(fragmentShaderSource = FRAGMENT_SHAD
             0f, 0f, 0f, 1.0f
         )
 
-
         rgbCompositeControlPoints = defaultCurvePoints.clone()
         redControlPoints = defaultCurvePoints.clone()
         greenControlPoints = defaultCurvePoints.clone()
@@ -119,7 +134,6 @@ open class PackFilterShader : TextureShader(fragmentShaderSource = FRAGMENT_SHAD
 
         updateToneCurveTexture()
     }
-
 
     private fun setRgbCompositeControlPoints(points: Array<PointF>) {
         rgbCompositeControlPoints = points
@@ -220,7 +234,6 @@ open class PackFilterShader : TextureShader(fragmentShaderSource = FRAGMENT_SHAD
         }
     }
 
-
     fun resetCurves() {
         this.setRgbCompositeControlPoints(defaultCurvePoints.clone())
         this.setRedControlPoints(defaultCurvePoints.clone())
@@ -271,12 +284,10 @@ open class PackFilterShader : TextureShader(fragmentShaderSource = FRAGMENT_SHAD
             }
 
             updateToneCurveTexture()
-
         } catch (e: IOException) {
             e.printStackTrace()
         }
     }
-
 
     @Throws(IOException::class)
     private fun InputStream.readShort(): Short {
@@ -331,21 +342,20 @@ open class PackFilterShader : TextureShader(fragmentShaderSource = FRAGMENT_SHAD
         toneCurveTexture.disable(GLES20.GL_TEXTURE_2D)
     }
 
-
     companion object {
         // language=glsl
 
         const val FRAGMENT_SHADER = """
             precision mediump float;
-            
+
             const mediump vec3 luminanceWeighting = vec3(0.2125, 0.7154, 0.0721);
 
             varying vec2 texCoord;
             uniform sampler2D texture;
             uniform sampler2D curveTexture;
-            
+
             uniform float intensity;
-            
+
             uniform float brightness;
             uniform float contrast;
             uniform float saturation;
@@ -353,10 +363,10 @@ open class PackFilterShader : TextureShader(fragmentShaderSource = FRAGMENT_SHAD
             uniform float tint;
             uniform mat4 colorMatrix;
             uniform float colorMatrixIntensity;
-            
+
             uniform float gamma;
             uniform float vibrant;
-            
+
             uniform float sepia;
             uniform mat4 sepiaMatrix;
 
@@ -364,7 +374,7 @@ open class PackFilterShader : TextureShader(fragmentShaderSource = FRAGMENT_SHAD
                 color.rgb += clamp(value, 0.0, 1.0);
                 return color;
             }
-            
+
             vec4 applyContrast(vec4 color, float value) {
                 float a = clamp(value, 0.5, 1.5);
                 return vec4(((color.rgb - vec3(0.5)) * a + vec3(0.5)), color.w);
@@ -375,22 +385,22 @@ open class PackFilterShader : TextureShader(fragmentShaderSource = FRAGMENT_SHAD
                 vec3 greyScaleColor = vec3(luminance);
                 return vec4(mix(greyScaleColor, color.rgb, value), color.w);
             }
-            
-            vec4 applyWarmth(vec4 color, float value) { 
+
+            vec4 applyWarmth(vec4 color, float value) {
                 color.r += value;
                 color.b -= value;
                 return color;
             }
-            
+
             vec4 applyTint(vec4 color, float value) {
                 color.g += clamp(value, -0.2, 0.2);
                 return color;
             }
-            
+
             vec4 applyGamma(vec4 color, float value) {
                 return vec4(pow(color.rgb, vec3(value)), color.w);
             }
-            
+
             vec4 applyVibrant(vec4 color, float value) {
                 float mx = max(max(color.r, color.g), color.b);
                 float average = (color.r + color.g + color.b) / 3.0;
@@ -398,11 +408,11 @@ open class PackFilterShader : TextureShader(fragmentShaderSource = FRAGMENT_SHAD
                 color.rgb = mix(color.rgb, vec3(mx), amt);
                 return color;
             }
-            
+
             vec4 applyColorMatrix(vec4 color, mat4 matrix, float opaque) {
                 return (color * matrix) * opaque + color * (1.0 - opaque);
             }
-            
+
             vec4 applySepia(vec4 color, float value) {
                 return applyColorMatrix(color, sepiaMatrix, value);
             }
@@ -413,10 +423,10 @@ open class PackFilterShader : TextureShader(fragmentShaderSource = FRAGMENT_SHAD
                 lowp float b = texture2D(curve, vec2(t.b, 0.0)).b;
                 return vec4(r, g, b, t.a);
             }
-            
-            
+
+
             void main() {
-            
+
                 vec4 color = texture2D(texture, texCoord);
                 vec4 t = texture2D(texture, texCoord);
 
@@ -433,8 +443,8 @@ open class PackFilterShader : TextureShader(fragmentShaderSource = FRAGMENT_SHAD
 
                 gl_FragColor = t * intensity + color * (1.0 - intensity);
             }
-            
-            
+
+
         """
     }
 }

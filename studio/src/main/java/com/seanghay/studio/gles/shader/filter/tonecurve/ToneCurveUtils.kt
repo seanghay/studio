@@ -1,11 +1,24 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studio.gles.shader.filter.tonecurve
 
 import android.graphics.Point
 import android.graphics.PointF
-import java.util.*
-import kotlin.collections.ArrayList
+import java.util.Arrays
 import kotlin.math.pow
-import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
 interface ToneCurveUtils {
@@ -68,7 +81,6 @@ interface ToneCurveUtils {
         return preparedSplinePoints
     }
 
-
     fun createSplineCurve2(points: Array<Point>): ArrayList<Point>? {
         val sdA = createSecondDerivative(points) ?: return null
         val n = sdA.size
@@ -91,7 +103,8 @@ interface ToneCurveUtils {
                 val a = 1 - t
                 val h = (next.x - cur.x).toDouble()
 
-                var y = a * cur.y + t * next.y + h * h / 6.0 * ((a * a * a - a) * sd[i] + (t * t * t - t) * sd[i + 1])
+                var y =
+                    a * cur.y + t * next.y + h * h / 6.0 * ((a * a * a - a) * sd[i] + (t * t * t - t) * sd[i + 1])
 
                 if (y > 255.0) {
                     y = 255.0
@@ -106,8 +119,6 @@ interface ToneCurveUtils {
         if (output.size == 255) output.add(points[points.size - 1])
         return output
     }
-
-
 
     fun createSecondDerivative(points: Array<Point>): ArrayList<Double>? {
         val n = points.size

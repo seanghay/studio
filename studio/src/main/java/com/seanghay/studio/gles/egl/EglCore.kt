@@ -1,14 +1,33 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studio.gles.egl
 
 import android.graphics.SurfaceTexture
-import android.opengl.*
+import android.opengl.EGL14
+import android.opengl.EGLConfig
+import android.opengl.EGLContext
+import android.opengl.EGLDisplay
+import android.opengl.EGLExt
+import android.opengl.EGLSurface
 import android.util.Log
 import android.view.Surface
 
-
 class EglCore(
-    private val sharedContext: EGLContext = EGL14.EGL_NO_CONTEXT,
-    private val flags: Int = 0
+  private val sharedContext: EGLContext = EGL14.EGL_NO_CONTEXT,
+  private val flags: Int = 0
 ) {
 
     private var eglDisplay: EGLDisplay = EGL14.EGL_NO_DISPLAY
@@ -57,7 +76,8 @@ class EglCore(
                     EGL14.EGL_NONE
                 )
 
-                val context = EGL14.eglCreateContext(eglDisplay, config, sharedContext, attribute3List, 0)
+                val context =
+                    EGL14.eglCreateContext(eglDisplay, config, sharedContext, attribute3List, 0)
 
                 if (EGL14.eglGetError() == EGL14.EGL_SUCCESS) {
                     eglConfig = config
@@ -79,13 +99,11 @@ class EglCore(
     private fun getDisplay() {
         eglDisplay = EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY)
         if (eglDisplay == EGL14.EGL_NO_DISPLAY) fail("unable to get EGL14 display")
-
     }
 
     private fun rationalChecks() {
         if (eglDisplay != EGL14.EGL_NO_DISPLAY) fail("EGL display already setup!")
     }
-
 
     fun getConfig(flags: Int, version: Int): EGLConfig? {
         val renderableType = if (version >= 3) EGLExt.EGL_OPENGL_ES3_BIT_KHR
@@ -96,10 +114,10 @@ class EglCore(
             EGL14.EGL_GREEN_SIZE, 8,
             EGL14.EGL_BLUE_SIZE, 8,
             EGL14.EGL_ALPHA_SIZE, 8,
-            //EGL14.EGL_DEPTH_SIZE, 16,
-            //EGL14.EGL_STENCIL_SIZE, 8,
+            // EGL14.EGL_DEPTH_SIZE, 16,
+            // EGL14.EGL_STENCIL_SIZE, 8,
             EGL14.EGL_RENDERABLE_TYPE, renderableType,
-            EGL14.EGL_NONE, 0,      // placeholder for recordable [@-3]
+            EGL14.EGL_NONE, 0, // placeholder for recordable [@-3]
             EGL14.EGL_NONE
         )
 
@@ -126,7 +144,12 @@ class EglCore(
 
     fun release() {
         if (eglDisplay != EGL14.EGL_NO_DISPLAY) {
-            EGL14.eglMakeCurrent(eglDisplay, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_CONTEXT)
+            EGL14.eglMakeCurrent(
+                eglDisplay,
+                EGL14.EGL_NO_SURFACE,
+                EGL14.EGL_NO_SURFACE,
+                EGL14.EGL_NO_CONTEXT
+            )
             EGL14.eglDestroyContext(eglDisplay, eglContext)
             EGL14.eglReleaseThread()
             EGL14.eglTerminate(eglDisplay)
@@ -153,7 +176,6 @@ class EglCore(
         EGL14.eglDestroySurface(eglDisplay, eglSurface)
     }
 
-
     fun createWindowSurface(surface: Any?): EGLSurface {
         if (surface !is Surface && surface !is SurfaceTexture) {
             fail("Invalid surface: $surface")
@@ -168,7 +190,6 @@ class EglCore(
                 ?: fail("Surface was null")
         }
     }
-
 
     fun createOffscreenSurface(width: Int, height: Int): EGLSurface {
         val surfaceAttributes = intArrayOf(
@@ -217,10 +238,9 @@ class EglCore(
         EGLExt.eglPresentationTimeANDROID(eglDisplay, eglSurface, nsecs)
     }
 
-
     fun isCurrent(eglSurface: EGLSurface): Boolean {
-        return eglContext == EGL14.eglGetCurrentContext()
-                && eglSurface == EGL14.eglGetCurrentSurface(EGL14.EGL_DRAW)
+        return eglContext == EGL14.eglGetCurrentContext() &&
+                eglSurface == EGL14.eglGetCurrentSurface(EGL14.EGL_DRAW)
     }
 
     fun querySurface(eglSurface: EGLSurface, name: Int): Int {
@@ -244,8 +264,8 @@ class EglCore(
         const val EGL_RECORDABLE_ANDROID = 0x3142
 
         fun <T> runs(
-            message: String? = "",
-            block: (() -> T)
+          message: String? = "",
+          block: (() -> T)
         ): T {
             return block().also {
                 val error = EGL14.eglGetError()

@@ -1,3 +1,18 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studio.gles.shader
 
 import android.opengl.GLES20
@@ -5,14 +20,19 @@ import com.seanghay.studio.gles.graphics.Matrix4f
 import com.seanghay.studio.gles.graphics.attribute.VertexAttribute
 import com.seanghay.studio.gles.graphics.mat4
 import com.seanghay.studio.gles.graphics.texture.Texture
+import com.seanghay.studio.gles.graphics.uniform.BooleanUniform
+import com.seanghay.studio.gles.graphics.uniform.Mat4Uniform
+import com.seanghay.studio.gles.graphics.uniform.uniform1f
+import com.seanghay.studio.gles.graphics.uniform.uniform1i
+import com.seanghay.studio.gles.graphics.uniform.uniform2f
 import com.seanghay.studio.gles.graphics.vec2
 import com.seanghay.studio.utils.BasicVertices
-import com.seanghay.studio.gles.graphics.uniform.*
-import com.seanghay.studio.gles.graphics.uniform.uniform1i
 
-open class TextureShader(override var vertexShaderSource: String = VERTEX_SHADER,
-                         override var fragmentShaderSource: String = FRAGMENT_SHADER,
-                         var coords: FloatArray = BasicVertices.FULL_RECTANGLE) : Shader() {
+open class TextureShader(
+  override var vertexShaderSource: String = VERTEX_SHADER,
+  override var fragmentShaderSource: String = FRAGMENT_SHADER,
+  var coords: FloatArray = BasicVertices.FULL_RECTANGLE
+) : Shader() {
 
     var hasExternalTexture = false
 
@@ -26,11 +46,13 @@ open class TextureShader(override var vertexShaderSource: String = VERTEX_SHADER
     // Viewport
     var resolution = vec2(0f, 0f)
 
-    open var textureCoordinateAttr = VertexAttribute("vTextureCoordinate",
+    open var textureCoordinateAttr = VertexAttribute(
+        "vTextureCoordinate",
         BasicVertices.NORMAL_TEXTURE_COORDINATES, 2
     ).autoInit()
 
-    open var positionAttr = VertexAttribute("vPosition",
+    open var positionAttr = VertexAttribute(
+        "vPosition",
         coords, 3
     ).autoInit()
         protected set
@@ -52,9 +74,7 @@ open class TextureShader(override var vertexShaderSource: String = VERTEX_SHADER
         .also { it.isOptional = true }
         .autoInit()
 
-
     open var textureUniform = uniform1i("texture").autoInit()
-
 
     override fun loadFragmentShaderSource(): String {
         return transformFragmentShader(fragmentShaderSource)
@@ -62,6 +82,7 @@ open class TextureShader(override var vertexShaderSource: String = VERTEX_SHADER
 
     // Noop
     override fun onCreate() {}
+
     open fun beforeDraw() {}
     open fun afterDraw() {}
     open fun beforeDrawVertices() {}
@@ -80,7 +101,6 @@ open class TextureShader(override var vertexShaderSource: String = VERTEX_SHADER
         resolution.x = width
         resolution.y = height
     }
-
 
     open fun draw(texture: Texture) = use {
         positionAttr.use {
@@ -112,11 +132,11 @@ open class TextureShader(override var vertexShaderSource: String = VERTEX_SHADER
 
         // language=glsl
         const val VERTEX_SHADER = """
-            attribute vec4 vPosition; 
+            attribute vec4 vPosition;
             attribute vec2 vTextureCoordinate;
-            
+
             varying vec2 texCoord;
-            
+
             uniform mat4 mvpMatrix;
             uniform bool flipY;
             uniform bool flipX;
@@ -125,11 +145,11 @@ open class TextureShader(override var vertexShaderSource: String = VERTEX_SHADER
             void main() {
                 gl_Position = mvpMatrix * vPosition;
                 texCoord = vTextureCoordinate;
-                
+
                 if (flipY) {
                     texCoord.y = 1.0 - texCoord.y;
                 }
-                
+
                 if (flipX) {
                     texCoord.x = 1.0 - texCoord.x;
                 }
@@ -139,9 +159,9 @@ open class TextureShader(override var vertexShaderSource: String = VERTEX_SHADER
         // language=glsl
         const val FRAGMENT_SHADER = """
             precision mediump float;
-            
+
             uniform sampler2D texture;
-            
+
             varying vec2 texCoord;
 
             void main() {

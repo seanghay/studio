@@ -1,3 +1,18 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studio.utils
 
 import android.media.MediaCodec
@@ -13,7 +28,6 @@ inline fun <R> String.toMetadataRetriever(block: MediaMetadataRetriever.() -> R)
         .use(block)
 }
 
-
 inline fun <R> MediaMetadataRetriever.use(block: MediaMetadataRetriever.() -> R): R {
     return block(this).also {
         release()
@@ -23,7 +37,6 @@ inline fun <R> MediaMetadataRetriever.use(block: MediaMetadataRetriever.() -> R)
 fun MediaMetadataRetriever.mimeType(): String {
     return extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE)
 }
-
 
 fun MediaMetadataRetriever.durationMillis(): Long {
     return extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION).toLong()
@@ -53,7 +66,6 @@ fun MediaMetadataRetriever.bitrate(): Long {
     return extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE).toLong()
 }
 
-
 fun MediaFormat.mimeType(): String {
     return getString(MediaFormat.KEY_MIME)
 }
@@ -75,4 +87,3 @@ fun MediaCodec.outputBufferAt(index: Int): ByteBuffer? {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
         getOutputBuffer(index) else outputBuffers.getOrNull(index)
 }
-

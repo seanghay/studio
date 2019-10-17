@@ -1,3 +1,18 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.BooleanUniform
@@ -11,7 +26,6 @@ class LuminanceMeltTransition : Transition("luminance-melt", SOURCE, 1000L) {
     open var lThresholdUniform = uniform1f("l_threshold").autoInit()
     open var above: Boolean = false
     open var aboveUniform = BooleanUniform("above").autoInit()
-
 
     override fun onUpdateUniforms() {
         super.onUpdateUniforms()
@@ -32,15 +46,15 @@ class LuminanceMeltTransition : Transition("luminance-melt", SOURCE, 1000L) {
 //optimizations :
 //luminance (see http://stackoverflow.com/questions/596216/formula-to-determine-brightness-of-rgb-color#answer-596241)
 // Y = (R+R+B+G+G+G)/6
-//or Y = (R+R+R+B+G+G+G+G)>>3 
+//or Y = (R+R+R+B+G+G+G+G)>>3
 
 
 //direction of movement :  0 : up, 1, down
-uniform bool direction; // = 1 
+uniform bool direction; // = 1
 //luminance threshold
-uniform float l_threshold; // = 0.8 
+uniform float l_threshold; // = 0.8
 //does the movement takes effect above or below luminance threshold ?
-uniform bool above; // = false 
+uniform bool above; // = false
 
 
 //Random function borrowed from everywhere
@@ -54,11 +68,11 @@ float rand(vec2 co){
 //      Author : Ian McEwan, Ashima Arts.
 //  Maintainer : ijm
 //     Lastmod : 20110822 (ijm)
-//     License : MIT  
+//     License : MIT
 //               2011 Ashima Arts. All rights reserved.
 //               Distributed under the MIT License. See LICENSE file.
 //               https://github.com/ashima/webgl-noise
-// 
+//
 
 vec3 mod289(vec3 x) {
   return x - floor(x * (1.0 / 289.0)) * 289.0;
@@ -146,14 +160,12 @@ vec4 transition(vec2 uv) {
      m = dist <= r && luminance(getFromColor(p))>l_threshold ? 1.0 : (progress*progress*progress);
     }
     else{
-     m = dist <= r && luminance(getFromColor(p))<l_threshold ? 1.0 : (progress*progress*progress);  
+     m = dist <= r && luminance(getFromColor(p))<l_threshold ? 1.0 : (progress*progress*progress);
     }
-    return mix(getFromColor(p), getToColor(p), m);    
+    return mix(getFromColor(p), getToColor(p), m);
   }
 }
 
         """
     }
 }
-
-

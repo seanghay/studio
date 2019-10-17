@@ -1,25 +1,37 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studio.gles
 
 import android.media.MediaCodec
 import android.media.MediaExtractor
-import android.media.MediaFormat
 import android.media.MediaMetadataRetriever
-import android.os.Build
 import android.view.Surface
 import androidx.annotation.CheckResult
 import com.seanghay.studio.utils.durationUs
 import com.seanghay.studio.utils.inputBufferAt
 import com.seanghay.studio.utils.isVideoFormat
 import com.seanghay.studio.utils.mimeType
-import java.nio.ByteBuffer
 import kotlin.math.max
 import kotlin.math.min
 
 class VideoDecoder(
-    private var surface: Surface,
-    private var path: String,
-    private var progressListener: ProgressListener? = null
-): Thread() {
+  private var surface: Surface,
+  private var path: String,
+  private var progressListener: ProgressListener? = null
+) : Thread() {
 
     private val extractor = MediaExtractor().also {
         it.setDataSource(path)
@@ -29,7 +41,8 @@ class VideoDecoder(
         it.setDataSource(path)
     }
 
-    private val videoTrackIndex = firstVideoTrack() ?: throw RuntimeException("Cannot get video track")
+    private val videoTrackIndex =
+        firstVideoTrack() ?: throw RuntimeException("Cannot get video track")
     private val videoTrackFormat = extractor.getTrackFormat(videoTrackIndex)
     private val videoMimeType: String = videoTrackFormat.mimeType()
     private val decoder: MediaCodec = MediaCodec.createDecoderByType(videoMimeType)
@@ -105,11 +118,12 @@ class VideoDecoder(
     }
 
     private fun waitStart() {
-        while(!isStarted) {
+        while (!isStarted) {
             synchronized(lock) {
                 try {
                     lock.wait()
-                }  catch (ex: InterruptedException) {}
+                } catch (ex: InterruptedException) {
+                }
             }
         }
     }
@@ -134,7 +148,6 @@ class VideoDecoder(
             extractor.advance()
         }
     }
-
 
     @CheckResult
     private fun checkOutputBuffers(): Boolean {
@@ -162,12 +175,10 @@ class VideoDecoder(
             }
 
             if (isEndOfStream && !isLoop) return false
-
         }
 
         return true
     }
-
 
     private fun processChanges() {
         writtenDuration = videoBufferInfo.presentationTimeUs
@@ -178,7 +189,6 @@ class VideoDecoder(
             // Log.d(TAG, "Progress: $progress")
         }
     }
-
 
     private fun startDecoding() {
         while (!isInterrupted && !isCompleted) {
@@ -199,7 +209,7 @@ class VideoDecoder(
 
     private fun waitResume() {
         synchronized(lock) {
-            while(isPaused) {
+            while (isPaused) {
                 try {
                     lock.wait()
                 } catch (ex: InterruptedException) {
@@ -209,13 +219,11 @@ class VideoDecoder(
         }
     }
 
-
     fun release() {
         synchronized(lock) {
             while (!isCompleted) {
                 isCompleted = true
                 lock.wait()
-
             }
         }
 
@@ -225,15 +233,13 @@ class VideoDecoder(
         surface.release()
     }
 
-
     private fun firstVideoTrack(): Int? {
-        for(trackIndex in 0 until extractor.trackCount) {
+        for (trackIndex in 0 until extractor.trackCount) {
             val trackFormat = extractor.getTrackFormat(trackIndex)
             if (trackFormat.isVideoFormat()) return trackIndex
         }
         return null
     }
-
 
     fun seekProgress(seekProgress: Float) {
         val seekDuration = (seekProgress * totalDuration).toLong()
@@ -244,7 +250,6 @@ class VideoDecoder(
 //    private fun getStopPosition(start: Long, end: Long): Int {
 //        val delta = end - start
 //    }
-
 
     interface ProgressListener {
         fun onProgressChanged(progress: Float)
@@ -257,14 +262,13 @@ class VideoDecoder(
         fun onRestartDecoding()
     }
 
-
     interface FrameCallback {
         fun preRender(presentationTimeUs: Long)
         fun postRender()
         fun loopReset()
     }
 
-    class SpeedCallback: FrameCallback {
+    class SpeedCallback : FrameCallback {
 
         private val oneMillion = 1_000_000L
         private var prevPresentMicroSeconds = 0L
@@ -293,7 +297,8 @@ class VideoDecoder(
 
                 when {
                     frameDelta < 0L -> frameDelta = 0
-                    frameDelta == 0L -> { }
+                    frameDelta == 0L -> {
+                    }
                     frameDelta > 10 * oneMillion -> frameDelta = 5 * oneMillion
                 }
 
@@ -304,8 +309,12 @@ class VideoDecoder(
                     if (sleepTimeMicroSeconds > 500000L)
                         sleepTimeMicroSeconds = 500000L
                     try {
-                        sleep(sleepTimeMicroSeconds / 1000, (sleepTimeMicroSeconds % 1000).toInt() * 1000)
-                    } catch (e: InterruptedException) {}
+                        sleep(
+                            sleepTimeMicroSeconds / 1000,
+                            (sleepTimeMicroSeconds % 1000).toInt() * 1000
+                        )
+                    } catch (e: InterruptedException) {
+                    }
                     nowMicroSeconds = System.nanoTime() / 1000L
                 }
 
@@ -315,13 +324,11 @@ class VideoDecoder(
         }
 
         override fun postRender() {
-
         }
 
         override fun loopReset() {
             loopReset = true
         }
-
     }
 
     companion object {

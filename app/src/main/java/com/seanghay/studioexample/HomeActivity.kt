@@ -3,6 +3,7 @@ package com.seanghay.studioexample
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.Editable
 import androidx.appcompat.app.AppCompatActivity
 import androidx.room.Room
 import com.seanghay.studioexample.adapter.StoryListAdapter
@@ -33,6 +34,10 @@ class HomeActivity : AppCompatActivity() {
         adapter.onItemClicked = {
             play(it.path)
         }
+
+
+        Editable.Factory.getInstance().newEditable("")
+
 
     }
 

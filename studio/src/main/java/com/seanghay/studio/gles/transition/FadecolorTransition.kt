@@ -1,3 +1,18 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.Vector3f
@@ -10,7 +25,6 @@ class FadecolorTransition : Transition("fadecolor", SOURCE, 1000L) {
     open var colorUniform = uniform3f("color").autoInit()
     open var colorPhase: Float = 0.4f
     open var colorPhaseUniform = uniform1f("colorPhase").autoInit()
-
 
     override fun onUpdateUniforms() {
         super.onUpdateUniforms()
@@ -36,5 +50,3 @@ vec4 transition (vec2 uv) {
         """
     }
 }
-
-

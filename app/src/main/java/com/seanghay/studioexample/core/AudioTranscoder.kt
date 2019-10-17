@@ -1,17 +1,34 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studioexample.core
 
-import android.media.*
+import android.media.MediaCodec
+import android.media.MediaExtractor
+import android.media.MediaFormat
+import android.media.MediaMuxer
+import android.media.MediaCodecInfo
 import com.seanghay.studio.utils.inputBufferAt
 import com.seanghay.studio.utils.isAudioFormat
 import com.seanghay.studio.utils.mimeType
 import com.seanghay.studio.utils.outputBufferAt
-import android.media.MediaCodec
-import java.nio.ByteBuffer
 
 @Deprecated("Deprecated")
 class AudioTranscoder(
-    private val filePath: String,
-    private val outputPath: String
+  private val filePath: String,
+  private val outputPath: String
 ) {
     private val extractor: MediaExtractor = MediaExtractor()
     private val muxer = MediaMuxer(outputPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
@@ -52,7 +69,10 @@ class AudioTranscoder(
     private fun configureEncoder() {
         val outputFormat = MediaFormat()
         outputFormat.setString(MediaFormat.KEY_MIME, "audio/mp4a-latm")
-        outputFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC)
+        outputFormat.setInteger(
+            MediaFormat.KEY_AAC_PROFILE,
+            MediaCodecInfo.CodecProfileLevel.AACObjectLC
+        )
         outputFormat.setInteger(MediaFormat.KEY_SAMPLE_RATE, 44100)
         outputFormat.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 1)
         outputFormat.setInteger(MediaFormat.KEY_BIT_RATE, 128000)
@@ -72,7 +92,8 @@ class AudioTranscoder(
             if (!isEndOfStream) {
                 val inputBufferIndex = decoder.dequeueInputBuffer(1000L)
                 if (inputBufferIndex >= 0) {
-                    val size = extractor.readSampleData(decoder.inputBufferAt(inputBufferIndex)!!, 0)
+                    val size =
+                        extractor.readSampleData(decoder.inputBufferAt(inputBufferIndex)!!, 0)
                     if (size < 0) {
                         // EOS
                         decoder.queueInputBuffer(
@@ -102,12 +123,11 @@ class AudioTranscoder(
 
                 muxer.writeSampleData(t, outputBuffer, bufferInfo)
                 decoder.releaseOutputBuffer(outputBufferIndex, false)
-            } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED){
+            } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                 val format = decoder.outputFormat
                 t = muxer.addTrack(format)
                 muxer.start()
             }
-
         }
 
         isStarted = false
@@ -115,10 +135,9 @@ class AudioTranscoder(
 
     var t = -1
 
-
     fun release() {
-         muxer.stop()
-         muxer.release()
+        muxer.stop()
+        muxer.release()
 
         encoder.flush()
         encoder.release()
@@ -127,10 +146,7 @@ class AudioTranscoder(
         extractor.release()
     }
 
-
     companion object {
         private const val TAG = "AudioTranscoder"
     }
 }
-
-

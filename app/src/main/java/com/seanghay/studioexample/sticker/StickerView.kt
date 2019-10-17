@@ -76,7 +76,7 @@ class StickerView : FrameLayout, QuoteDesigner {
         MoveGestureDetector(context, MoveGestureListener())
 
     private val scaleGestureDetector: ScaleGestureDetector =
-        ScaleGestureDetector(context, ScaleGestureListner())
+        ScaleGestureDetector(context, ScaleGestureListener())
 
     private val rotateGestureDetector: RotateGestureDetector =
         RotateGestureDetector(context, RotationGestureListener())
@@ -246,9 +246,9 @@ class StickerView : FrameLayout, QuoteDesigner {
         }
     }
 
-    private inner class ScaleGestureListner : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+    private inner class ScaleGestureListener : ScaleGestureDetector.SimpleOnScaleGestureListener() {
         override fun onScale(detector: ScaleGestureDetector?): Boolean {
-            if (detector == null) return super.onScale(detector)
+            if (detector == null) return false
             scaleFactor += detector.scaleFactor - 1f
             invalidate()
             return true

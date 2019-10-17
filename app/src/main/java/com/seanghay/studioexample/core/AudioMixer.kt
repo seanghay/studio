@@ -1,12 +1,10 @@
 package com.seanghay.studioexample.core
 
+
 import android.media.*
 import android.util.SparseArray
-import android.util.SparseIntArray
-import androidx.core.util.forEach
 import com.seanghay.studio.utils.isAudioFormat
 import com.seanghay.studio.utils.isVideoFormat
-import com.seanghay.studio.utils.use
 import java.nio.ByteBuffer
 import java.util.*
 
@@ -108,7 +106,7 @@ class AudioMixer(
                 }
             }
         }
-        
+
         isStarted = false
         muxer.stop()
     }
@@ -116,9 +114,9 @@ class AudioMixer(
     private fun setOrientationHint() {
         val retriever = MediaMetadataRetriever()
         retriever.use {
-            setDataSource(videoPath)
+            it.setDataSource(videoPath)
             val orientationString: String? =
-                extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)
+                it.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)
             orientationString?.toInt()?.let { if (it >= 0) muxer.setOrientationHint(it) }
         }
     }

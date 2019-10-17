@@ -1,3 +1,18 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studio.composer
 
 import android.media.MediaCodec
@@ -7,12 +22,13 @@ import com.seanghay.studio.utils.outputBufferAt
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.ShortBuffer
-import java.util.*
+import java.util.ArrayDeque
+import java.util.Queue
 
 class AudioChannel(
-    private val encoder: MediaCodec,
-    private val decoder: MediaCodec,
-    private val encodeFormat: MediaFormat
+  private val encoder: MediaCodec,
+  private val decoder: MediaCodec,
+  private val encodeFormat: MediaFormat
 ) {
 
     private val emptyBuffers: Queue<AudioBuffer> = ArrayDeque()
@@ -43,10 +59,9 @@ class AudioChannel(
         overflowBuffer.presentationTimeUs = 0
     }
 
-
     fun drainDecoderBufferAndQueue(bufferIndex: Int, presentationTimeUs: Long) {
         if (actualDecodedFormat == null)
-            throw RuntimeException("Buffer received before format!");
+            throw RuntimeException("Buffer received before format!")
 
         val data = if (bufferIndex == BUFFER_INDEX_END_OF_STREAM) null
         else decoder.outputBufferAt(bufferIndex)
@@ -66,7 +81,6 @@ class AudioChannel(
 
         filledBuffers.add(buffer)
     }
-
 
     fun feedEncoder(timeoutUs: Long): Boolean {
         val hasOverflow = overflowBuffer.data?.hasRemaining() ?: false
@@ -116,10 +130,9 @@ class AudioChannel(
         return true
     }
 
-
     private fun remixAndMaybeFillOverflow(
-        input: AudioBuffer,
-        outBuff: ShortBuffer
+      input: AudioBuffer,
+      outBuff: ShortBuffer
     ): Long {
         val inBuff = input.data!!
         val overflowBuff = overflowBuffer.data!!
@@ -185,18 +198,17 @@ class AudioChannel(
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun audioBufferOf(
-        bufferIndex: Int = 0,
-        presentationTimeUs: Long = 0,
-        data: ShortBuffer? = null
+      bufferIndex: Int = 0,
+      presentationTimeUs: Long = 0,
+      data: ShortBuffer? = null
     ): AudioBuffer {
         return AudioBuffer(bufferIndex, presentationTimeUs, data)
     }
 
-
     private data class AudioBuffer(
-        var bufferIndex: Int,
-        var presentationTimeUs: Long,
-        var data: ShortBuffer?
+      var bufferIndex: Int,
+      var presentationTimeUs: Long,
+      var data: ShortBuffer?
     )
 
     companion object {
@@ -204,11 +216,10 @@ class AudioChannel(
         const val BYTES_PER_SHORT = 2
         const val MICROSECS_PER_SEC = 1000000L
 
-
         private fun sampleCountToDurationUs(
-            sampleCount: Int,
-            sampleRate: Int,
-            channelCount: Int
+          sampleCount: Int,
+          sampleRate: Int,
+          channelCount: Int
         ): Long {
             return sampleCount / (sampleRate * MICROSECS_PER_SEC) / channelCount
         }

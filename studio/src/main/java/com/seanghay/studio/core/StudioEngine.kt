@@ -1,14 +1,25 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studio.core
 
 import android.graphics.SurfaceTexture
-import android.opengl.GLES20.*
-import android.util.Size
 import android.view.TextureView
-import com.seanghay.studio.gles.RenderContext
 import java.io.File
 
-
-class StudioEngine: TextureView.SurfaceTextureListener {
+class StudioEngine : TextureView.SurfaceTextureListener {
 
     private var viewportWidth: Int = 0
     private var viewportHeight: Int = 0
@@ -31,7 +42,6 @@ class StudioEngine: TextureView.SurfaceTextureListener {
         setViewport(width, height)
     }
 
-
     private fun releaseSurface() {
         renderThread.quit()
     }
@@ -41,7 +51,6 @@ class StudioEngine: TextureView.SurfaceTextureListener {
     }
 
     override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
-
     }
 
     override fun onSurfaceTextureDestroyed(surface: SurfaceTexture?): Boolean {
@@ -49,7 +58,6 @@ class StudioEngine: TextureView.SurfaceTextureListener {
 
         return false
     }
-
 
     override fun onSurfaceTextureAvailable(surface: SurfaceTexture?, width: Int, height: Int) {
         if (surface == null) return

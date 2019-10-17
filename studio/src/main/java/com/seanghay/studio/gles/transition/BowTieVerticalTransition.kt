@@ -1,3 +1,18 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studio.gles.transition
 
 class BowTieVerticalTransition : Transition("bow-tie-vertical", SOURCE, 1000L) {
@@ -52,12 +67,12 @@ float blur_edge(vec2 bot1, vec2 bot2, vec2 top, vec2 testPt)
   vec2 perpDir = vec2(lineDir.y, -lineDir.x);
   vec2 dirToPt1 = bot1 - testPt;
   float dist1 = abs(dot(normalize(perpDir), dirToPt1));
-  
+
   lineDir = bot2 - top;
   perpDir = vec2(lineDir.y, -lineDir.x);
   dirToPt1 = bot2 - testPt;
   float min_dist = min(abs(dot(normalize(perpDir), dirToPt1)), dist1);
-  
+
   if (min_dist < 0.005) {
     return min_dist / 0.005;
   }
@@ -95,7 +110,7 @@ vec4 transition (vec2 uv) {
       {
         return getFromColor(uv);
       }
-    }    
+    }
   }
   else if (in_bottom_triangle(uv))
   {
@@ -108,7 +123,7 @@ vec4 transition (vec2 uv) {
         getFromColor(uv),
         getToColor(uv),
         blur_edge(vertex2, vertex3, vertex1, uv)
-      );  
+      );
     }
     else
     {
@@ -122,5 +137,3 @@ vec4 transition (vec2 uv) {
         """
     }
 }
-
-

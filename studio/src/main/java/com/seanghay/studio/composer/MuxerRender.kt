@@ -1,3 +1,18 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studio.composer
 
 import android.media.MediaCodec
@@ -8,7 +23,6 @@ import com.seanghay.studio.composer.MuxerRender.SampleType.AUDIO
 import com.seanghay.studio.composer.MuxerRender.SampleType.VIDEO
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-
 
 class MuxerRender(private val muxer: MediaMuxer) {
 
@@ -21,7 +35,6 @@ class MuxerRender(private val muxer: MediaMuxer) {
     private var videoTrackIndex: Int = -1
     private var byteBuffer: ByteBuffer? = null
 
-
     fun setOutputFormat(sampleType: SampleType, format: MediaFormat) {
         when (sampleType) {
             VIDEO -> videoFormat = format
@@ -33,14 +46,16 @@ class MuxerRender(private val muxer: MediaMuxer) {
         if (videoFormat != null && audioFormat != null) {
 
             videoTrackIndex = muxer.addTrack(videoFormat!!)
-            Log.v(TAG, "Added track #" + videoTrackIndex + " with " + videoFormat!!.getString(MediaFormat.KEY_MIME) + " to muxer")
+            Log.v(
+                TAG,
+                "Added track #" + videoTrackIndex + " with " + videoFormat!!.getString(MediaFormat.KEY_MIME) + " to muxer"
+            )
             audioTrackIndex = muxer.addTrack(audioFormat!!)
 
             Log.v(
                 TAG,
                 "Added track #" + audioTrackIndex + " with " + audioFormat!!.getString(MediaFormat.KEY_MIME) + " to muxer"
             )
-
         } else if (videoFormat != null) {
 
             videoTrackIndex = muxer.addTrack(videoFormat)
@@ -48,7 +63,6 @@ class MuxerRender(private val muxer: MediaMuxer) {
                 TAG,
                 "Added track #" + videoTrackIndex + " with " + videoFormat!!.getString(MediaFormat.KEY_MIME) + " to muxer"
             )
-
         }
 
         muxer.start()
@@ -74,9 +88,9 @@ class MuxerRender(private val muxer: MediaMuxer) {
     }
 
     fun writeSampleData(
-        sampleType: SampleType,
-        byteBuf: ByteBuffer,
-        bufferInfo: MediaCodec.BufferInfo
+      sampleType: SampleType,
+      byteBuf: ByteBuffer,
+      bufferInfo: MediaCodec.BufferInfo
     ) {
         if (isStarted) {
             muxer.writeSampleData(trackIndexOf(sampleType), byteBuf, bufferInfo)
@@ -102,9 +116,9 @@ class MuxerRender(private val muxer: MediaMuxer) {
     enum class SampleType { VIDEO, AUDIO }
 
     private data class SampleInfo(
-        var sampleType: SampleType,
-        var size: Int,
-        var bufferInfo: MediaCodec.BufferInfo
+      var sampleType: SampleType,
+      var size: Int,
+      var bufferInfo: MediaCodec.BufferInfo
     ) {
 
         val presentationTimeUs: Long get() = bufferInfo.presentationTimeUs
@@ -115,10 +129,8 @@ class MuxerRender(private val muxer: MediaMuxer) {
         }
     }
 
-
     companion object {
         private const val TAG = "MuxerRender"
         private const val BUFFER_SIZE = 64 * 1024 // Magic number
     }
-
 }

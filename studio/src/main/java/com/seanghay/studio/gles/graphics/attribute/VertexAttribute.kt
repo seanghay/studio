@@ -1,3 +1,18 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studio.gles.graphics.attribute
 
 import android.opengl.GLES20
@@ -7,10 +22,8 @@ import com.seanghay.studio.utils.toFloatBuffer
 import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 
-
-
-
-class VertexAttribute(name: String, var vertices: FloatArray, var coordinatesPerVertex: Int): Attribute<FloatArray>(name) {
+class VertexAttribute(name: String, var vertices: FloatArray, var coordinatesPerVertex: Int) :
+    Attribute<FloatArray>(name) {
 
     var buffer: FloatBuffer = vertices.toFloatBuffer()
         protected set
@@ -25,7 +38,8 @@ class VertexAttribute(name: String, var vertices: FloatArray, var coordinatesPer
 
     fun enable() {
         GLES20.glEnableVertexAttribArray(getLocation())
-        GLES20.glVertexAttribPointer(getLocation(), coordinatesPerVertex, GLES20.GL_FLOAT,
+        GLES20.glVertexAttribPointer(
+            getLocation(), coordinatesPerVertex, GLES20.GL_FLOAT,
             false, coordinatesPerVertex * FLOAT_SIZE_BYTES, buffer
         )
     }
@@ -53,7 +67,6 @@ class VertexAttribute(name: String, var vertices: FloatArray, var coordinatesPer
     fun disable() {
         GLES20.glDisableVertexAttribArray(getLocation())
     }
-
 
     inline fun use(block: VertexAttribute.() -> Unit) {
         enable()

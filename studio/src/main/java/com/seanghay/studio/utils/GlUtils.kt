@@ -1,16 +1,58 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studio.utils
 
-import android.opengl.GLES20.*
+import android.opengl.GLES20.GL_CLAMP_TO_EDGE
+import android.opengl.GLES20.GL_COMPILE_STATUS
+import android.opengl.GLES20.GL_FRAGMENT_SHADER
+import android.opengl.GLES20.GL_LINEAR
+import android.opengl.GLES20.GL_LINK_STATUS
+import android.opengl.GLES20.GL_TEXTURE_2D
+import android.opengl.GLES20.GL_TEXTURE_MAG_FILTER
+import android.opengl.GLES20.GL_TEXTURE_MIN_FILTER
+import android.opengl.GLES20.GL_TEXTURE_WRAP_S
+import android.opengl.GLES20.GL_TEXTURE_WRAP_T
+import android.opengl.GLES20.GL_TRUE
+import android.opengl.GLES20.GL_VERTEX_SHADER
+import android.opengl.GLES20.glAttachShader
+import android.opengl.GLES20.glBindTexture
+import android.opengl.GLES20.glCompileShader
+import android.opengl.GLES20.glCreateProgram
+import android.opengl.GLES20.glCreateShader
+import android.opengl.GLES20.glDeleteProgram
+import android.opengl.GLES20.glDeleteShader
+import android.opengl.GLES20.glGenTextures
+import android.opengl.GLES20.glGetProgramInfoLog
+import android.opengl.GLES20.glGetProgramiv
+import android.opengl.GLES20.glGetShaderInfoLog
+import android.opengl.GLES20.glGetShaderiv
+import android.opengl.GLES20.glLinkProgram
+import android.opengl.GLES20.glShaderSource
+import android.opengl.GLES20.glTexParameteri
+import android.opengl.GLES20.glValidateProgram
 import android.util.Log
-import com.seanghay.studio.gles.egl.glScope
 import com.seanghay.studio.gles.annotation.GlContext
+import com.seanghay.studio.gles.egl.glScope
 
 object GlUtils {
 
     data class ShaderData(
-        var program: Int,
-        var vertexShader: Int,
-        var fragmentShader: Int
+      var program: Int,
+      var vertexShader: Int,
+      var fragmentShader: Int
     )
 
     private const val TAG = "GlCommon"
@@ -46,9 +88,11 @@ object GlUtils {
         return shader
     }
 
-
     @GlContext
-    fun createProgramWithShaders(vertexShaderSource: String, fragmentShaderSource: String): ShaderData {
+    fun createProgramWithShaders(
+      vertexShaderSource: String,
+      fragmentShaderSource: String
+    ): ShaderData {
         val vertexShader = createShader(GL_VERTEX_SHADER, vertexShaderSource)
         val fragmentShader = createShader(GL_FRAGMENT_SHADER, fragmentShaderSource)
 
@@ -64,7 +108,6 @@ object GlUtils {
             createShader(GL_FRAGMENT_SHADER, fragmentShaderSource)
         return createProgram(vertexShader, fragmentShader)
     }
-
 
     @GlContext
     fun createProgram(vertexShader: Int, fragmentShader: Int): Int {
@@ -100,10 +143,8 @@ object GlUtils {
         glDeleteShader(vertexShader)
         glDeleteShader(fragmentShader)
 
-
         return program
     }
-
 
     @GlContext
     fun genTexture(bindBlock: ((Int) -> Unit)? = null): Int {

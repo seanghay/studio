@@ -1,7 +1,28 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studio.gles.shader.filter.tonecurve
 
 import android.graphics.PointF
-import android.opengl.GLES20.*
+import android.opengl.GLES20.GL_RGBA
+import android.opengl.GLES20.GL_TEXTURE0
+import android.opengl.GLES20.GL_TEXTURE19
+import android.opengl.GLES20.GL_TEXTURE_2D
+import android.opengl.GLES20.GL_UNSIGNED_BYTE
+import android.opengl.GLES20.glActiveTexture
+import android.opengl.GLES20.glTexImage2D
 import com.seanghay.studio.gles.annotation.GlContext
 import com.seanghay.studio.gles.egl.glScope
 import com.seanghay.studio.gles.graphics.texture.Texture2d
@@ -10,13 +31,12 @@ import com.seanghay.studio.gles.shader.TextureShader
 import java.io.IOException
 import java.io.InputStream
 import java.nio.ByteBuffer
-import java.util.*
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import java.util.ArrayList
+import java.util.LinkedList
+import java.util.Queue
 
-
-
-
-class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FRAGMENT_SHADER), ToneCurveUtils {
+class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FRAGMENT_SHADER),
+    ToneCurveUtils {
 
     private val toneCurveTexture: Texture2d = Texture2d()
     private val toneCurveUniform = uniform1i("curveTexture").autoInit()
@@ -25,7 +45,8 @@ class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FR
     private val postDrawRunnables: Queue<Runnable> = LinkedList()
 
     // Curves
-    private val defaultCurvePoints = arrayOf(PointF(0.0f, 0.0f), PointF(0.5f, 0.5f), PointF(1.0f, 1.0f))
+    private val defaultCurvePoints =
+        arrayOf(PointF(0.0f, 0.0f), PointF(0.5f, 0.5f), PointF(1.0f, 1.0f))
 
     private var rgbCompositeControlPoints: Array<PointF>
     private var redControlPoints: Array<PointF>
@@ -80,7 +101,6 @@ class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FR
         executes(postDrawRunnables)
         toneCurveTexture.disable(GL_TEXTURE_2D)
     }
-
 
     private fun setRgbCompositeControlPoints(points: Array<PointF>) {
         rgbCompositeControlPoints = points
@@ -166,7 +186,6 @@ class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FR
         }
     }
 
-
     fun resetCurves() {
         this.setRgbCompositeControlPoints(defaultCurvePoints.clone())
         this.setRedControlPoints(defaultCurvePoints.clone())
@@ -217,12 +236,10 @@ class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FR
             }
 
             updateToneCurveTexture()
-
         } catch (e: IOException) {
             e.printStackTrace()
         }
     }
-
 
     @Throws(IOException::class)
     private fun InputStream.readShort(): Short {
@@ -238,21 +255,21 @@ class ToneCurveFilterShader : TextureShader(fragmentShaderSource = TONE_CURVE_FR
             uniform sampler2D texture;
             uniform sampler2D curveTexture;
             varying vec2 texCoord;
-            
+
             vec4 tone_curve(sampler2D curve, vec4 t);
 
             void main() {
                 lowp vec4 t = texture2D(texture, texCoord);
                  gl_FragColor = tone_curve(curveTexture, t);
             }
-            
+
             vec4 tone_curve(sampler2D curve, vec4 t) {
                 lowp float r = texture2D(curve, vec2(t.r, 0.0)).r;
                 lowp float g = texture2D(curve, vec2(t.g, 0.0)).g;
                 lowp float b = texture2D(curve, vec2(t.b, 0.0)).b;
                 return vec4(r, g, b, t.a);
             }
-            
+
         """.trimIndent()
     }
 }

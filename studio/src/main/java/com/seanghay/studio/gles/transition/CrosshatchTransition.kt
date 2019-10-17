@@ -1,3 +1,18 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.Vector2f
@@ -12,7 +27,6 @@ class CrosshatchTransition : Transition("crosshatch", SOURCE, 1000L) {
     open var thresholdUniform = uniform1f("threshold").autoInit()
     open var fadeEdge: Float = 0.1f
     open var fadeEdgeUniform = uniform1f("fadeEdge").autoInit()
-
 
     override fun onUpdateUniforms() {
         super.onUpdateUniforms()
@@ -39,11 +53,9 @@ float rand(vec2 co) {
 vec4 transition(vec2 p) {
   float dist = distance(center, p) / threshold;
   float r = progress - min(rand(vec2(p.y, 0.0)), rand(vec2(0.0, p.x)));
-  return mix(getFromColor(p), getToColor(p), mix(0.0, mix(step(dist, r), 1.0, smoothstep(1.0-fadeEdge, 1.0, progress)), smoothstep(0.0, fadeEdge, progress)));    
+  return mix(getFromColor(p), getToColor(p), mix(0.0, mix(step(dist, r), 1.0, smoothstep(1.0-fadeEdge, 1.0, progress)), smoothstep(0.0, fadeEdge, progress)));
 }
 
         """
     }
 }
-
-

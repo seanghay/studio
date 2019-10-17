@@ -2,6 +2,8 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
+apply from: '../dependencies.gradle'
+
 
 
 def versionMajor = 0
@@ -31,12 +33,16 @@ android {
         targetCompatibility = '1.8'
     }
 
+    lintOptions {
+        abortOnError false
+    }
+
 
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:" + versions.kotlin
     implementation 'androidx.appcompat:appcompat:1.1.0'
 
     implementation 'androidx.core:core-ktx:1.1.0'
@@ -70,3 +76,5 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }
+
+

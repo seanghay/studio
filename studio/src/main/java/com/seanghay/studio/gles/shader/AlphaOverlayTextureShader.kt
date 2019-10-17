@@ -1,3 +1,18 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studio.gles.shader
 
 import android.opengl.Matrix
@@ -35,8 +50,6 @@ open class AlphaOverlayTextureShader :
             mvpMatrix.elements, 0, mvpMatrix.elements, 0,
             translateMatrix, 0
         )
-
-
     }
 
     override fun writeUniforms() {
@@ -56,7 +69,7 @@ open class AlphaOverlayTextureShader :
             uniform sampler2D texture;
             uniform float $ALPHA_UNIFORM;
             varying vec2 texCoord;
-            
+
             void main() {
                 vec4 textureColor = texture2D(texture, texCoord);
                 gl_FragColor = mix(vec4(0.0), textureColor, $ALPHA_UNIFORM);

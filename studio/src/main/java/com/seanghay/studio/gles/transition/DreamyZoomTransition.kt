@@ -1,3 +1,18 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
@@ -8,7 +23,6 @@ class DreamyZoomTransition : Transition("dreamy-zoom", SOURCE, 1000L) {
     open var rotationUniform = uniform1f("rotation").autoInit()
     open var scale: Float = 1.2f
     open var scaleUniform = uniform1f("scale").autoInit()
-
 
     override fun onUpdateUniforms() {
         super.onUpdateUniforms()
@@ -43,7 +57,7 @@ vec4 transition(vec2 uv) {
   float phase = progress < 0.5 ? progress * 2.0 : (progress - 0.5) * 2.0;
   float angleOffset = progress < 0.5 ? mix(0.0, rotation * DEG2RAD, phase) : mix(-rotation * DEG2RAD, 0.0, phase);
   float newScale = progress < 0.5 ? mix(1.0, scale, phase) : mix(scale, 1.0, phase);
-  
+
   vec2 center = vec2(0, 0);
 
   // Calculate the source point
@@ -64,5 +78,3 @@ vec4 transition(vec2 uv) {
         """
     }
 }
-
-

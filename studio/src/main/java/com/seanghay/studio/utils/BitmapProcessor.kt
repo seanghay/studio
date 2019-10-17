@@ -1,8 +1,36 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studio.utils
 
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
+import android.graphics.Matrix
+import android.graphics.Paint
+import android.graphics.Rect
 import android.media.ExifInterface
-import com.seanghay.studio.utils.BitmapProcessor.CropType.*
+import com.seanghay.studio.utils.BitmapProcessor.CropType.FILL_CENTER
+import com.seanghay.studio.utils.BitmapProcessor.CropType.FILL_END
+import com.seanghay.studio.utils.BitmapProcessor.CropType.FILL_START
+import com.seanghay.studio.utils.BitmapProcessor.CropType.FIT_CENTER
+import com.seanghay.studio.utils.BitmapProcessor.CropType.FIT_END
+import com.seanghay.studio.utils.BitmapProcessor.CropType.FIT_START
 import io.reactivex.Single
 import java.io.IOException
 
@@ -15,14 +43,11 @@ class BitmapProcessor(private val source: Bitmap) {
     private var scaledHeight: Int = height
     private var cropType: CropType = FIT_CENTER
 
-
     @Throws(IOException::class)
     fun processToFile(path: String) {
-
     }
 
     fun quality(quality: Int) {
-
     }
 
     fun cropType(cropType: CropType) {
@@ -39,7 +64,6 @@ class BitmapProcessor(private val source: Bitmap) {
             it.onSuccess(proceedSync())
         }
     }
-
 
     fun proceedSync(): Bitmap {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -90,7 +114,6 @@ class BitmapProcessor(private val source: Bitmap) {
         return rect
     }
 
-
     private fun fillEndRect(): Rect {
         val ratio = width.toFloat() / height.toFloat()
         val bottom = (scaledWidth.toFloat() / ratio).toInt()
@@ -126,7 +149,6 @@ class BitmapProcessor(private val source: Bitmap) {
         else ((right - scaledWidth) / 2f).toInt()
         return Rect(left, 0, right + left, scaledHeight)
     }
-
 
     private fun fitStartRect(): Rect {
         val ratio = width.toFloat() / height.toFloat()
@@ -168,7 +190,6 @@ class BitmapProcessor(private val source: Bitmap) {
         }
     }
 
-
     companion object {
 
         fun loadSync(filePath: String): Bitmap {
@@ -184,7 +205,6 @@ class BitmapProcessor(private val source: Bitmap) {
             return Bitmap.createBitmap(b, 0, 0, b.width, b.height, matrix, true)
         }
 
-
         fun load(filePath: String): Single<Bitmap> {
             return Single.create {
                 it.onSuccess(loadSync(filePath))
@@ -197,6 +217,5 @@ class BitmapProcessor(private val source: Bitmap) {
             ExifInterface.ORIENTATION_ROTATE_270 -> 270
             else -> 0
         }
-
     }
 }

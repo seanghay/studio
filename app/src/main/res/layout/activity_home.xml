@@ -38,6 +38,7 @@
                     android:layout_gravity="end"
                     android:layout_marginEnd="16dp"
                     android:text="Create"
+                    app:cornerRadius="30dp"
                     android:theme="@style/ThemeOverlay.Lightable" />
 
         </com.google.android.material.appbar.MaterialToolbar>

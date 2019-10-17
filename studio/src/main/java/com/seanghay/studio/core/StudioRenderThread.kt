@@ -1,15 +1,25 @@
+/**
+ * Designed and developed by Seanghay Yath (@seanghay)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.seanghay.studio.core
 
 import android.graphics.SurfaceTexture
-import android.opengl.GLES20
-import android.opengl.GLES20.*
-import android.util.Log
-import com.seanghay.studio.gles.RenderContext
 import com.seanghay.studio.gles.egl.EglCore
 import com.seanghay.studio.gles.egl.EglWindowSurface
 
-
-class StudioRenderThread(private val surfaceTexture: SurfaceTexture): Thread() {
+class StudioRenderThread(private val surfaceTexture: SurfaceTexture) : Thread() {
 
     private val eglCore = EglCore()
     private lateinit var windowSurface: EglWindowSurface
@@ -17,7 +27,7 @@ class StudioRenderThread(private val surfaceTexture: SurfaceTexture): Thread() {
     var drawable: StudioDrawable? = null
 
     var height: Int = -1
-    var width: Int  = -1
+    var width: Int = -1
 
     private fun setup() {
         eglCore.setup()
@@ -64,5 +74,4 @@ class StudioRenderThread(private val surfaceTexture: SurfaceTexture): Thread() {
     fun quit() {
         isRunning = false
     }
-
 }
