@@ -1,4 +1,4 @@
-nguage: android
+language: android
 dist: trusty
 android:
   components:
