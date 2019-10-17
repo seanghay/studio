@@ -15,8 +15,11 @@ def versionBuild = 1
 android {
     compileSdkVersion versions.compileSdk
     defaultConfig {
+
         minSdkVersion versions.minSdk
         targetSdkVersion versions.compileSdk
+        buildToolsVersion versions.buildTools
+
         applicationId "com.seanghay.studioexample"
         versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
         versionName "1.0"

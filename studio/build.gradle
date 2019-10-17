@@ -7,6 +7,7 @@ apply from: '../bintrayconfig.gradle'
 android {
     compileSdkVersion versions.compileSdk
     defaultConfig {
+        buildToolsVersion versions.buildTools
         minSdkVersion versions.minSdk
         targetSdkVersion versions.compileSdk
         versionCode versions.publishVersionCode
