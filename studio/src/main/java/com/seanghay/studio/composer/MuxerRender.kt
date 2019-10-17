@@ -58,7 +58,7 @@ class MuxerRender(private val muxer: MediaMuxer) {
             )
         } else if (videoFormat != null) {
 
-            videoTrackIndex = muxer.addTrack(videoFormat)
+            videoTrackIndex = muxer.addTrack(videoFormat!!)
             Log.v(
                 TAG,
                 "Added track #" + videoTrackIndex + " with " + videoFormat!!.getString(MediaFormat.KEY_MIME) + " to muxer"
