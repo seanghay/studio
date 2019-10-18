@@ -17,7 +17,7 @@ package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.Uniform
 
-abstract open class Transition(
+abstract class Transition(
   var name: String,
   var source: String,
   var duration: Long
