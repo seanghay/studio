@@ -15,7 +15,7 @@
  */
 package com.seanghay.studio.gles.transition
 
-class GlitchMemoriesTransition : Transition("glitch-memories", SOURCE, 1000L) {
+open class GlitchMemoriesTransition : Transition("glitch-memories", SOURCE, 1000L) {
 
     companion object {
         // language=glsl

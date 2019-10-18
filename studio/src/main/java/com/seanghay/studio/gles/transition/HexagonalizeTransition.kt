@@ -18,7 +18,7 @@ package com.seanghay.studio.gles.transition
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 import com.seanghay.studio.gles.graphics.uniform.uniform1i
 
-class HexagonalizeTransition : Transition("hexagonalize", SOURCE, 1000L) {
+open class HexagonalizeTransition : Transition("hexagonalize", SOURCE, 1000L) {
 
     open var steps: Int = 50
     open var stepsUniform = uniform1i("steps").autoInit()

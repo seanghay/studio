@@ -17,7 +17,7 @@ package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 
-class AngularTransition : Transition("angular", SOURCE, 1000L) {
+open class AngularTransition : Transition("angular", SOURCE, 1000L) {
 
     open var startingAngle: Float = 90f
     open var startingAngleUniform = uniform1f("startingAngle").autoInit()

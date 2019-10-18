@@ -15,7 +15,7 @@
  */
 package com.seanghay.studio.gles.transition
 
-class SwirlTransition : Transition("swirl", SOURCE, 1000L) {
+open class SwirlTransition : Transition("swirl", SOURCE, 1000L) {
 
     companion object {
         // language=glsl

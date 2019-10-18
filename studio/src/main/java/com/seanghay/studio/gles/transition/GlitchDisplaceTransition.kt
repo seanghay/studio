@@ -15,7 +15,7 @@
  */
 package com.seanghay.studio.gles.transition
 
-class GlitchDisplaceTransition : Transition("glitch-displace", SOURCE, 1000L) {
+open class GlitchDisplaceTransition : Transition("glitch-displace", SOURCE, 1000L) {
 
     companion object {
         // language=glsl

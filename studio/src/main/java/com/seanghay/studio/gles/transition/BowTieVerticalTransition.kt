@@ -15,7 +15,7 @@
  */
 package com.seanghay.studio.gles.transition
 
-class BowTieVerticalTransition : Transition("bow-tie-vertical", SOURCE, 1000L) {
+open class BowTieVerticalTransition : Transition("bow-tie-vertical", SOURCE, 1000L) {
 
     companion object {
         // language=glsl

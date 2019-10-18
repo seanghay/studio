@@ -18,7 +18,7 @@ package com.seanghay.studio.gles.transition
 import com.seanghay.studio.gles.graphics.Vector4f
 import com.seanghay.studio.gles.graphics.uniform.uniform4f
 
-class ColorphaseTransition : Transition("colorphase", SOURCE, 1000L) {
+open class ColorphaseTransition : Transition("colorphase", SOURCE, 1000L) {
 
     open var fromStep: Vector4f = Vector4f(0f, 0.2f, 0.4f, 0f)
     open var fromStepUniform = uniform4f("fromStep").autoInit()

@@ -17,7 +17,7 @@ package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 
-class MorphTransition : Transition("morph", SOURCE, 1000L) {
+open class MorphTransition : Transition("morph", SOURCE, 1000L) {
 
     open var strength: Float = 0.1f
     open var strengthUniform = uniform1f("strength").autoInit()

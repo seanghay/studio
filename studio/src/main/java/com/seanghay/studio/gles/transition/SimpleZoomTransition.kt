@@ -17,7 +17,7 @@ package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 
-class SimpleZoomTransition : Transition("simple-zoom", SOURCE, 1000L) {
+open class SimpleZoomTransition : Transition("simple-zoom", SOURCE, 1000L) {
 
     open var zoomQuickness: Float = 0.8f
     open var zoomQuicknessUniform = uniform1f("zoom_quickness").autoInit()

@@ -21,7 +21,7 @@ import com.seanghay.studio.gles.graphics.uniform.uniform1f
 import com.seanghay.studio.gles.graphics.uniform.uniform2f
 import com.seanghay.studio.gles.graphics.uniform.uniform4f
 
-class RotateScaleFadeTransition : Transition("rotate-scale-fade", SOURCE, 1000L) {
+open class RotateScaleFadeTransition : Transition("rotate-scale-fade", SOURCE, 1000L) {
 
     open var center: Vector2f = Vector2f(0.5f, 0.5f)
     open var centerUniform = uniform2f("center").autoInit()

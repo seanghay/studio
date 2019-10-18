@@ -17,7 +17,7 @@ package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 
-class WindTransition : Transition("wind", SOURCE, 1000L) {
+open class WindTransition : Transition("wind", SOURCE, 1000L) {
 
     open var size: Float = 0.2f
     open var sizeUniform = uniform1f("size").autoInit()

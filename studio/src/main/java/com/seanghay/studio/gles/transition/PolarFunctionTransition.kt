@@ -17,7 +17,7 @@ package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.uniform1i
 
-class PolarFunctionTransition : Transition("polar-function", SOURCE, 1000L) {
+open class PolarFunctionTransition : Transition("polar-function", SOURCE, 1000L) {
 
     open var segments: Int = 5
     open var segmentsUniform = uniform1i("segments").autoInit()

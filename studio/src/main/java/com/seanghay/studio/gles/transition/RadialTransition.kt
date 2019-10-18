@@ -17,7 +17,7 @@ package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 
-class RadialTransition : Transition("radial", SOURCE, 1000L) {
+open class RadialTransition : Transition("radial", SOURCE, 1000L) {
 
     open var smoothness: Float = 1f
     open var smoothnessUniform = uniform1f("smoothness").autoInit()

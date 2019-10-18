@@ -18,7 +18,7 @@ package com.seanghay.studio.gles.transition
 import com.seanghay.studio.gles.graphics.Vector4f
 import com.seanghay.studio.gles.graphics.uniform.uniform4f
 
-class CircleCropTransition : Transition("circle-crop", SOURCE, 1000L) {
+open class CircleCropTransition : Transition("circle-crop", SOURCE, 1000L) {
 
     open var bgcolor: Vector4f = Vector4f(0f, 0f, 0f, 1f)
     open var bgcolorUniform = uniform4f("bgcolor").autoInit()

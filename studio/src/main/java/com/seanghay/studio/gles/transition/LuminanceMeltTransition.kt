@@ -18,7 +18,7 @@ package com.seanghay.studio.gles.transition
 import com.seanghay.studio.gles.graphics.uniform.BooleanUniform
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 
-class LuminanceMeltTransition : Transition("luminance-melt", SOURCE, 1000L) {
+open class LuminanceMeltTransition : Transition("luminance-melt", SOURCE, 1000L) {
 
     open var direction: Boolean = true
     open var directionUniform = BooleanUniform("direction").autoInit()

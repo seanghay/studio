@@ -19,7 +19,7 @@ import com.seanghay.studio.gles.graphics.Vector2f
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 import com.seanghay.studio.gles.graphics.uniform.uniform2f
 
-class PolkaDotsCurtainTransition : Transition("polka-dots-curtain", SOURCE, 1000L) {
+open class PolkaDotsCurtainTransition : Transition("polka-dots-curtain", SOURCE, 1000L) {
 
     open var dots: Float = 20f
     open var dotsUniform = uniform1f("dots").autoInit()

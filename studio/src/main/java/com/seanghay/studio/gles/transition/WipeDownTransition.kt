@@ -15,7 +15,7 @@
  */
 package com.seanghay.studio.gles.transition
 
-class WipeDownTransition : Transition("wipe-down", SOURCE, 1000L) {
+open class WipeDownTransition : Transition("wipe-down", SOURCE, 1000L) {
 
     companion object {
         // language=glsl

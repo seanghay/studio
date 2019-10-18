@@ -17,7 +17,7 @@ package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 
-class CubeTransition : Transition("cube", SOURCE, 1000L) {
+open class CubeTransition : Transition("cube", SOURCE, 1000L) {
 
     open var persp: Float = 0.7f
     open var perspUniform = uniform1f("persp").autoInit()

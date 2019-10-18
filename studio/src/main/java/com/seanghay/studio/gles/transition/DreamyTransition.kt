@@ -15,7 +15,7 @@
  */
 package com.seanghay.studio.gles.transition
 
-class DreamyTransition : Transition("dreamy", SOURCE, 1000L) {
+open class DreamyTransition : Transition("dreamy", SOURCE, 1000L) {
 
     companion object {
         // language=glsl

@@ -15,7 +15,7 @@
  */
 package com.seanghay.studio.gles.transition
 
-class CrosswarpTransition : Transition("crosswarp", SOURCE, 2000) {
+open class CrosswarpTransition : Transition("crosswarp", SOURCE, 2000) {
     companion object {
         // language=glsl
         const val SOURCE = """

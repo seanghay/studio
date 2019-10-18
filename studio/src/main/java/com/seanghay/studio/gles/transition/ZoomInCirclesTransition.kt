@@ -15,7 +15,7 @@
  */
 package com.seanghay.studio.gles.transition
 
-class ZoomInCirclesTransition : Transition("zoom-in-circles", SOURCE, 1000L) {
+open class ZoomInCirclesTransition : Transition("zoom-in-circles", SOURCE, 1000L) {
 
     companion object {
         // language=glsl

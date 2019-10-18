@@ -17,7 +17,7 @@ package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 
-class CrazyParametricFunTransition : Transition("crazy-parametric-fun", SOURCE, 1000L) {
+open class CrazyParametricFunTransition : Transition("crazy-parametric-fun", SOURCE, 1000L) {
 
     open var a: Float = 4f
     open var aUniform = uniform1f("a").autoInit()

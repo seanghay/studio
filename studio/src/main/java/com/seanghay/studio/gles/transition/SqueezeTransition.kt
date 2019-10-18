@@ -17,7 +17,7 @@ package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 
-class SqueezeTransition : Transition("squeeze", SOURCE, 1000L) {
+open class SqueezeTransition : Transition("squeeze", SOURCE, 1000L) {
 
     open var colorSeparation: Float = 0.04f
     open var colorSeparationUniform = uniform1f("colorSeparation").autoInit()

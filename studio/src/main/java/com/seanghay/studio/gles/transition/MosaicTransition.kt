@@ -17,7 +17,7 @@ package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.uniform1i
 
-class MosaicTransition : Transition("mosaic", SOURCE, 1000L) {
+open class MosaicTransition : Transition("mosaic", SOURCE, 1000L) {
 
     open var endx: Int = 2
     open var endxUniform = uniform1i("endx").autoInit()

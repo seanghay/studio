@@ -18,7 +18,7 @@ package com.seanghay.studio.gles.transition
 import com.seanghay.studio.gles.graphics.Vector2f
 import com.seanghay.studio.gles.graphics.uniform.uniform2f
 
-class DirectionalTransition : Transition("directional", SOURCE, 1000L) {
+open class DirectionalTransition : Transition("directional", SOURCE, 1000L) {
 
     open var direction: Vector2f = Vector2f(0f, 1f)
     open var directionUniform = uniform2f("direction").autoInit()

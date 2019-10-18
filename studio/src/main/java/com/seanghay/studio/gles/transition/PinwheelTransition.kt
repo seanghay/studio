@@ -17,7 +17,7 @@ package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 
-class PinwheelTransition : Transition("pinwheel", SOURCE, 1000L) {
+open class PinwheelTransition : Transition("pinwheel", SOURCE, 1000L) {
 
     open var speed: Float = 2f
     open var speedUniform = uniform1f("speed").autoInit()

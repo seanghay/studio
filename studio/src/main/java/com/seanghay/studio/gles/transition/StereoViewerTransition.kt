@@ -17,7 +17,7 @@ package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 
-class StereoViewerTransition : Transition("stereo-viewer", SOURCE, 1000L) {
+open class StereoViewerTransition : Transition("stereo-viewer", SOURCE, 1000L) {
 
     open var zoom: Float = 0.88f
     open var zoomUniform = uniform1f("zoom").autoInit()

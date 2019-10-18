@@ -17,7 +17,7 @@ package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 
-class FadegrayscaleTransition : Transition("fadegrayscale", SOURCE, 1000L) {
+open class FadegrayscaleTransition : Transition("fadegrayscale", SOURCE, 1000L) {
 
     open var intensity: Float = 0.3f
     open var intensityUniform = uniform1f("intensity").autoInit()

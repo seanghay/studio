@@ -17,7 +17,7 @@ package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 
-class WaterDropTransition : Transition("water-drop", SOURCE, 1000L) {
+open class WaterDropTransition : Transition("water-drop", SOURCE, 1000L) {
 
     open var amplitude: Float = 30f
     open var amplitudeUniform = uniform1f("amplitude").autoInit()

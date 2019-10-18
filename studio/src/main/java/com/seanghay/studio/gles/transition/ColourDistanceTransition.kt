@@ -17,7 +17,7 @@ package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 
-class ColourDistanceTransition : Transition("colour-distance", SOURCE, 1000L) {
+open class ColourDistanceTransition : Transition("colour-distance", SOURCE, 1000L) {
 
     open var power: Float = 5f
     open var powerUniform = uniform1f("power").autoInit()

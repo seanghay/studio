@@ -15,7 +15,7 @@
  */
 package com.seanghay.studio.gles.transition
 
-class WindowblindsTransition : Transition("windowblinds", SOURCE, 1000L) {
+open class WindowblindsTransition : Transition("windowblinds", SOURCE, 1000L) {
 
     companion object {
         // language=glsl

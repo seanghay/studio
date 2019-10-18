@@ -18,7 +18,7 @@ package com.seanghay.studio.gles.transition
 import com.seanghay.studio.gles.graphics.uniform.BooleanUniform
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 
-class CircleopenTransition : Transition("circleopen", SOURCE, 1000L) {
+open class CircleopenTransition : Transition("circleopen", SOURCE, 1000L) {
 
     open var smoothness: Float = 0.3f
     open var smoothnessUniform = uniform1f("smoothness").autoInit()

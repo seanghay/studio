@@ -17,7 +17,7 @@ package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 
-class FlyeyeTransition : Transition("flyeye", SOURCE, 1000L) {
+open class FlyeyeTransition : Transition("flyeye", SOURCE, 1000L) {
 
     open var size: Float = 0.04f
     open var sizeUniform = uniform1f("size").autoInit()

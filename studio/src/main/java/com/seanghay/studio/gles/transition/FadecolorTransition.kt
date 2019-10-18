@@ -19,7 +19,7 @@ import com.seanghay.studio.gles.graphics.Vector3f
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 import com.seanghay.studio.gles.graphics.uniform.uniform3f
 
-class FadecolorTransition : Transition("fadecolor", SOURCE, 1000L) {
+open class FadecolorTransition : Transition("fadecolor", SOURCE, 1000L) {
 
     open var color: Vector3f = Vector3f(0f, 0f, 0f)
     open var colorUniform = uniform3f("color").autoInit()

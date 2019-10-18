@@ -19,7 +19,7 @@ import com.seanghay.studio.gles.graphics.Vector4f
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 import com.seanghay.studio.gles.graphics.uniform.uniform4f
 
-class BounceTransition : Transition("bounce", SOURCE, 1000L) {
+open class BounceTransition : Transition("bounce", SOURCE, 1000L) {
 
     open var shadowColour: Vector4f = Vector4f(0f, 0f, 0f, 0.6f)
     open var shadowColourUniform = uniform4f("shadow_colour").autoInit()

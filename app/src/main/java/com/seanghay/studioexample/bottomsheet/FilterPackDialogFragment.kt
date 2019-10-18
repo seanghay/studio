@@ -22,7 +22,6 @@ import kotlinx.android.synthetic.main.dialog_filters.*
 class FilterPackDialogFragment : BottomSheetDialogFragment(), SeekBar.OnSeekBarChangeListener {
 
     private var listener: FilterPackListener? = null
-
     private val labelTextViews = mutableMapOf<String, TextView>()
     private var filterPack: PackFilter? = null
 
@@ -44,7 +43,8 @@ class FilterPackDialogFragment : BottomSheetDialogFragment(), SeekBar.OnSeekBarC
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val packFilter = arguments?.getParcelable<PackFilter>(KEY_FILTER_PACK) ?: throw NullPointerException("PackFilter was null")
+        val packFilter = arguments?.getParcelable<PackFilter>(KEY_FILTER_PACK)
+            ?: throw NullPointerException("PackFilter was null")
         this.filterPack = packFilter
 
         traverseLabels(view)
@@ -108,7 +108,8 @@ class FilterPackDialogFragment : BottomSheetDialogFragment(), SeekBar.OnSeekBarC
             seekBar?.progress = progress.toInt()
             val labelConverter = labelFunctions[it.key]
 
-            labelTextViews[it.key]?.text = wrap(labels[it.key] ?: "", labelConverter!!(progress).toInt())
+            labelTextViews[it.key]?.text =
+                wrap(labels[it.key] ?: "", labelConverter!!(progress).toInt())
         }
     }
 
@@ -185,7 +186,7 @@ class FilterPackDialogFragment : BottomSheetDialogFragment(), SeekBar.OnSeekBarC
 
         private val encodeFunctions = mapOf<String, ((Float) -> Float)>(
             "brightness" to { value -> (0.5f + value) * 100f },
-            "contrast" to { value -> value * 50f  },
+            "contrast" to { value -> value * 50f },
             "saturation" to { value -> value * 50f },
             "gamma" to { value -> value * 50f },
             "tint" to { value -> (0.5f + value) * 100f },
@@ -211,7 +212,7 @@ class FilterPackDialogFragment : BottomSheetDialogFragment(), SeekBar.OnSeekBarC
             "brightness" to { value -> value - 50f },
             "contrast" to { value -> value - 50f },
             "saturation" to { value -> value - 50f },
-            "gamma" to { value -> value - 50f},
+            "gamma" to { value -> value - 50f },
             "tint" to { value -> value - 50f },
             "warmth" to { value -> value - 50f },
             "sepia" to { value -> value },

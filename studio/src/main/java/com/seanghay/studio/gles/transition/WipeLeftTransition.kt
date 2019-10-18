@@ -15,7 +15,7 @@
  */
 package com.seanghay.studio.gles.transition
 
-class WipeLeftTransition : Transition("wipe-left", SOURCE, 1000L) {
+open class WipeLeftTransition : Transition("wipe-left", SOURCE, 1000L) {
 
     companion object {
         // language=glsl

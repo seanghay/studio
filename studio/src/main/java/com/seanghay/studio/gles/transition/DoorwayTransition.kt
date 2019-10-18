@@ -17,7 +17,7 @@ package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 
-class DoorwayTransition : Transition("doorway", SOURCE, 1000L) {
+open class DoorwayTransition : Transition("doorway", SOURCE, 1000L) {
 
     open var reflection: Float = 0.4f
     open var reflectionUniform = uniform1f("reflection").autoInit()

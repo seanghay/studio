@@ -15,7 +15,7 @@
  */
 package com.seanghay.studio.gles.transition
 
-class WipeUpTransition : Transition("wipe-up", SOURCE, 1000L) {
+open class WipeUpTransition : Transition("wipe-up", SOURCE, 1000L) {
 
     companion object {
         // language=glsl

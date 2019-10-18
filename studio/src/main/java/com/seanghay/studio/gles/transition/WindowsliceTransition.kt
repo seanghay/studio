@@ -17,7 +17,7 @@ package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 
-class WindowsliceTransition : Transition("windowslice", SOURCE, 1000L) {
+open class WindowsliceTransition : Transition("windowslice", SOURCE, 1000L) {
 
     open var count: Float = 10f
     open var countUniform = uniform1f("count").autoInit()

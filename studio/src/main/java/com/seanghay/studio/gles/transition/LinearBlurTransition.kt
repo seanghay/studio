@@ -18,7 +18,7 @@ package com.seanghay.studio.gles.transition
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 
 // TODO: Should be remove, because it's not good perf.
-class LinearBlurTransition : Transition("linear-blur", SOURCE, 1000L) {
+open class LinearBlurTransition : Transition("linear-blur", SOURCE, 1000L) {
 
     open var intensity: Float = 0.1f
     open var intensityUniform = uniform1f("intensity").autoInit()

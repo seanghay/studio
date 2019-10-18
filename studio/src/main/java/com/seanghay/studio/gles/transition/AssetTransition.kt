@@ -17,7 +17,7 @@ package com.seanghay.studio.gles.transition
 
 import android.content.Context
 
-class AssetTransition(
+open class AssetTransition(
   private val context: Context,
   private val filename: String,
   name: String

@@ -15,7 +15,7 @@
  */
 package com.seanghay.studio.gles.transition
 
-class HeartTransition : Transition("heart", SOURCE, 1000L) {
+open class HeartTransition : Transition("heart", SOURCE, 1000L) {
 
     companion object {
         // language=glsl

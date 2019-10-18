@@ -18,7 +18,7 @@ package com.seanghay.studio.gles.transition
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 import com.seanghay.studio.gles.graphics.uniform.uniform1i
 
-class DoomScreenTransitionTransition : Transition("doom-screen-transition", SOURCE, 1000L) {
+open class DoomScreenTransitionTransition : Transition("doom-screen-transition", SOURCE, 1000L) {
 
     open var bars: Int = 30
     open var barsUniform = uniform1i("bars").autoInit()

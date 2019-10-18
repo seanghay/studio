@@ -20,7 +20,7 @@ import com.seanghay.studio.gles.graphics.Vector3f
 import com.seanghay.studio.gles.graphics.uniform.uniform2f
 import com.seanghay.studio.gles.graphics.uniform.uniform3f
 
-class CircleTransition : Transition("circle", SOURCE, 1000L) {
+open class CircleTransition : Transition("circle", SOURCE, 1000L) {
 
     open var center: Vector2f = Vector2f(0.5f, 0.5f)
     open var centerUniform = uniform2f("center").autoInit()

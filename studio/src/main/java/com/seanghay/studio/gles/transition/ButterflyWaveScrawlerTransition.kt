@@ -17,7 +17,7 @@ package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 
-class ButterflyWaveScrawlerTransition : Transition("butterfly-wave-scrawler", SOURCE, 1000L) {
+open class ButterflyWaveScrawlerTransition : Transition("butterfly-wave-scrawler", SOURCE, 1000L) {
 
     open var amplitude: Float = 1f
     open var amplitudeUniform = uniform1f("amplitude").autoInit()

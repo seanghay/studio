@@ -18,7 +18,7 @@ package com.seanghay.studio.gles.transition
 import com.seanghay.studio.gles.graphics.Vector3f
 import com.seanghay.studio.gles.graphics.uniform.uniform3f
 
-class BurnTransition : Transition("burn", SOURCE, 1000L) {
+open class BurnTransition : Transition("burn", SOURCE, 1000L) {
 
     open var color: Vector3f = Vector3f(0.9f, 0.4f, 0.2f)
     open var colorUniform = uniform3f("color").autoInit()

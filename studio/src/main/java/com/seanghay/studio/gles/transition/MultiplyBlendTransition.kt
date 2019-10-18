@@ -15,7 +15,7 @@
  */
 package com.seanghay.studio.gles.transition
 
-class MultiplyBlendTransition : Transition("multiply-blend", SOURCE, 1000L) {
+open class MultiplyBlendTransition : Transition("multiply-blend", SOURCE, 1000L) {
 
     companion object {
         // language=glsl

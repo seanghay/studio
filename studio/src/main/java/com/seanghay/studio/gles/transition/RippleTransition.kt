@@ -17,7 +17,7 @@ package com.seanghay.studio.gles.transition
 
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 
-class RippleTransition : Transition("ripple", SOURCE, 2000) {
+open class RippleTransition : Transition("ripple", SOURCE, 2000) {
 
     var speed = 50.0f
     var amplitude = 100.0f

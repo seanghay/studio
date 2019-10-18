@@ -21,7 +21,7 @@ import com.seanghay.studio.gles.graphics.uniform.uniform1f
 import com.seanghay.studio.gles.graphics.uniform.uniform2f
 import com.seanghay.studio.gles.graphics.uniform.uniform3f
 
-class UndulatingBurnOutTransition : Transition("undulating-burn-out", SOURCE, 1000L) {
+open class UndulatingBurnOutTransition : Transition("undulating-burn-out", SOURCE, 1000L) {
 
     open var smoothness: Float = 0.03f
     open var smoothnessUniform = uniform1f("smoothness").autoInit()

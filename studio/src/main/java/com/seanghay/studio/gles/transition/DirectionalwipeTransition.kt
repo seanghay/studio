@@ -19,7 +19,7 @@ import com.seanghay.studio.gles.graphics.Vector2f
 import com.seanghay.studio.gles.graphics.uniform.uniform1f
 import com.seanghay.studio.gles.graphics.uniform.uniform2f
 
-class DirectionalwipeTransition : Transition("directionalwipe", SOURCE, 1000L) {
+open class DirectionalwipeTransition : Transition("directionalwipe", SOURCE, 1000L) {
 
     open var direction: Vector2f = Vector2f(1f, -1f)
     open var directionUniform = uniform2f("direction").autoInit()

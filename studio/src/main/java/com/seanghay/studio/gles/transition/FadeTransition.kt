@@ -15,7 +15,7 @@
  */
 package com.seanghay.studio.gles.transition
 
-class FadeTransition(name: String, duration: Long) : Transition(
+open class FadeTransition(name: String, duration: Long) : Transition(
     name, SOURCE, duration
 ) {
 

@@ -15,7 +15,7 @@
  */
 package com.seanghay.studio.gles.transition
 
-class BowTieHorizontalTransition : Transition("bow-tie-horizontal", SOURCE, 1000L) {
+open class BowTieHorizontalTransition : Transition("bow-tie-horizontal", SOURCE, 1000L) {
 
     companion object {
         // language=glsl
