@@ -60,8 +60,6 @@ class QuoteDialogFragment : AppCompatDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
         state = arguments?.getParcelable(KEY_STATE) ?: throw NullPointerException("State was null")
 
-
-
         toolbar.inflateMenu(R.menu.quote)
         toolbar.setNavigationOnClickListener { dismiss() }
         toolbar.setOnMenuItemClickListener {

@@ -1,10 +1,13 @@
 package com.seanghay.studioexample
 
+import android.Manifest.permission.READ_EXTERNAL_STORAGE
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.text.Editable
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.room.Room
 import com.seanghay.studioexample.adapter.StoryListAdapter
 import kotlinx.android.synthetic.main.activity_home.*
@@ -31,14 +34,30 @@ class HomeActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        buttonCreate.isEnabled = false
+
         adapter.onItemClicked = {
             play(it.path)
         }
 
-
-        Editable.Factory.getInstance().newEditable("")
-
-
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                READ_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(
+                this,
+                WRITE_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE),
+                0
+            )
+        } else {
+            buttonCreate.isEnabled = true
+            adapter.patch(appDatabase.storyDao().getAll().sortedByDescending { it.createdAt })
+        }
     }
 
 
@@ -46,14 +65,22 @@ class HomeActivity : AppCompatActivity() {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(path))
         intent.setDataAndType(Uri.parse(path), "video/mp4")
         startActivity(intent)
-
-
     }
 
-    override fun onResume() {
-        super.onResume()
-        adapter.patch(appDatabase.storyDao().getAll().sortedByDescending { it.createdAt })
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            buttonCreate.isEnabled = true
+            adapter.patch(appDatabase.storyDao().getAll().sortedByDescending { it.createdAt })
+        } else {
+            buttonCreate.isEnabled = false
+        }
     }
+
 
     private fun setRecyclerViewConfigurations() {
         recyclerView.adapter = adapter

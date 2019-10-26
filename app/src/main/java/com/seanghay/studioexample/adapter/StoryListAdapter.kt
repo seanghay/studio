@@ -17,7 +17,8 @@ import com.seanghay.studioexample.R
 import com.seanghay.studioexample.StoryEntity
 import kotlinx.android.synthetic.main.item_video.view.*
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 
@@ -46,13 +47,14 @@ class StoryListAdapter(
     }
 
     fun patch(items: List<StoryEntity>) {
+
         val callback = object : DiffUtil.Callback() {
             override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                return items[oldItemPosition].id == items[newItemPosition].id
+                return this@StoryListAdapter.items[oldItemPosition].id == items[newItemPosition].id
             }
 
             override fun getOldListSize(): Int {
-                return itemCount
+                return this@StoryListAdapter.items.size
             }
 
             override fun getNewListSize(): Int {
@@ -60,7 +62,7 @@ class StoryListAdapter(
             }
 
             override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                return items[oldItemPosition] == items[newItemPosition]
+                return this@StoryListAdapter.items[oldItemPosition] == items[newItemPosition]
             }
         }
 
