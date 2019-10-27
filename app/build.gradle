@@ -73,6 +73,8 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxjava:2.2.13'
     implementation "io.reactivex.rxjava2:rxkotlin:2.4.0"
 
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0-beta01"
+
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
