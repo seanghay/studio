@@ -7,7 +7,9 @@ import com.seanghay.studioexample.dao.SlideDao
 import com.seanghay.studioexample.dao.StoryDao
 
 
-@Database(version = 3, entities = [SlideEntity::class, AudioEntity::class, StoryEntity::class])
+@Database(version = 3,
+    exportSchema = false,
+    entities = [SlideEntity::class, AudioEntity::class, StoryEntity::class])
 abstract class AppDatabase : RoomDatabase() {
     abstract fun slideDao(): SlideDao
     abstract fun audioDao(): AudioDao

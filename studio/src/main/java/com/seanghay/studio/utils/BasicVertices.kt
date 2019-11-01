@@ -17,6 +17,20 @@ package com.seanghay.studio.utils
 
 object BasicVertices {
 
+    val RECT_STRIP = floatArrayOf(
+        -1.0f, -1.0f, 0f,
+        1.0f, -1.0f, 0f,
+        -1.0f, 1.0f, 0f,
+        1.0f, 1.0f, 0f
+    )
+
+    val RECT_STRIP_TEXTURE = floatArrayOf(
+        0.0f, 1.0f,
+        1.0f, 1.0f,
+        0.0f, 0.0f,
+        1.0f, 0.0f
+    )
+
     val FULL_RECTANGLE = floatArrayOf(
         -1f, -1f, 0f,
         -1f, 1f, 0f,

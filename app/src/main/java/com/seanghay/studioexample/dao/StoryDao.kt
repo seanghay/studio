@@ -1,7 +1,9 @@
 package com.seanghay.studioexample.dao
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.seanghay.studioexample.StoryEntity
+import io.reactivex.Flowable
 
 
 @Dao
@@ -18,6 +20,9 @@ interface StoryDao {
 
     @Query("Select * From StoryEntity")
     fun getAll(): List<StoryEntity>
+
+    @Query("Select * From StoryEntity")
+    fun getAllFlowable(): LiveData<List<StoryEntity>>
 
     @Delete
     fun delete(slide: StoryEntity)

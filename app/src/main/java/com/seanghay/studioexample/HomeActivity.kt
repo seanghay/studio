@@ -8,9 +8,14 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.app.ShareCompat
+import androidx.core.content.FileProvider
+import androidx.lifecycle.Observer
 import androidx.room.Room
 import com.seanghay.studioexample.adapter.StoryListAdapter
 import kotlinx.android.synthetic.main.activity_home.*
+import java.io.File
+
 
 class HomeActivity : AppCompatActivity() {
 
@@ -34,11 +39,23 @@ class HomeActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        buttonCreate.setOnLongClickListener {
+            openFolder()
+            false
+        }
+
         buttonCreate.isEnabled = false
 
         adapter.onItemClicked = {
             play(it.path)
         }
+
+        adapter.onDeleteClick = {
+            appDatabase.storyDao().delete(it)
+            File(it.path).deleteRecursively()
+        }
+
+        adapter.onSharedClick = { shareVideo(it.path) }
 
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -56,10 +73,34 @@ class HomeActivity : AppCompatActivity() {
             )
         } else {
             buttonCreate.isEnabled = true
-            adapter.patch(appDatabase.storyDao().getAll().sortedByDescending { it.createdAt })
         }
+
     }
 
+    private fun openFolder() {
+
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        appDatabase.storyDao().getAllFlowable().observe(this, Observer {
+            adapter.patch(it.sortedByDescending { d -> d.createdAt })
+        })
+    }
+
+    private fun shareVideo(filePath: String) {
+        val file = File(filePath)
+        val uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
+
+        ShareCompat.IntentBuilder.from(this)
+            .setStream(uri)
+            .setType("video/mp4")
+            .setChooserTitle("Share video...")
+            .startChooser()
+
+    }
 
     private fun play(path: String) {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(path))
@@ -73,12 +114,8 @@ class HomeActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            buttonCreate.isEnabled = true
-            adapter.patch(appDatabase.storyDao().getAll().sortedByDescending { it.createdAt })
-        } else {
-            buttonCreate.isEnabled = false
-        }
+        buttonCreate.isEnabled =
+            requestCode == 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED
     }
 
 

@@ -2,17 +2,17 @@ package com.seanghay.studioexample.adapter
 
 import android.graphics.Color
 import android.media.MediaMetadataRetriever
-import android.media.ThumbnailUtils
-import android.provider.MediaStore
 import android.text.SpannableStringBuilder
 import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.text.color
 import androidx.core.text.scale
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.seanghay.studioexample.R
 import com.seanghay.studioexample.StoryEntity
 import kotlinx.android.synthetic.main.item_video.view.*
@@ -26,7 +26,11 @@ class StoryListAdapter(
     var items: List<StoryEntity> = emptyList()
 ) : RecyclerView.Adapter<StoryListAdapter.ViewHolder>() {
 
+
     var onItemClicked: (StoryEntity) -> Unit = {}
+    var onSharedClick: (StoryEntity) -> Unit = {}
+    var onDeleteClick: (StoryEntity) -> Unit = {}
+
 
     private val retriver = MediaMetadataRetriever()
 
@@ -73,14 +77,34 @@ class StoryListAdapter(
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
+        private val popupMenu = PopupMenu(itemView.context, itemView.more)
+
         init {
+            popupMenu.inflate(R.menu.more)
+
             itemView.setOnClickListener {
                 onItemClicked(items[adapterPosition])
+            }
+
+            itemView.more.setOnClickListener {
+                popupMenu.show()
+            }
+
+            popupMenu.setOnMenuItemClickListener {
+                if (it.itemId == R.id.share) {
+                    val item = items[adapterPosition]
+                    onSharedClick(item)
+                    true
+
+                } else if (it.itemId == R.id.delete) {
+                    val item = items[adapterPosition]
+                    onDeleteClick(item)
+                    true
+                } else false
             }
         }
 
         fun bind(item: StoryEntity) {
-
             val relativeTime = DateUtils.getRelativeTimeSpanString(item.createdAt).toString()
             retriver.setDataSource(item.path)
             val duration =
@@ -98,12 +122,11 @@ class StoryListAdapter(
                     .color(Color.BLACK) { append(formatDuration(duration)) }
             )
 
-            val bitmap = ThumbnailUtils.createVideoThumbnail(
-                item.path,
-                MediaStore.Images.Thumbnails.FULL_SCREEN_KIND
-            )
 
-            itemView.thumbnail.setImageBitmap(bitmap)
+            Glide.with(itemView)
+                .load(item.path)
+                .centerCrop()
+                .into(itemView.thumbnail)
 
         }
 

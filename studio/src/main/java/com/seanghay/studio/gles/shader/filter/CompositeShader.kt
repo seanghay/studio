@@ -66,12 +66,12 @@ class CompositeShader(private val shaders: ArrayList<TextureShader> = arrayListO
 
             if (index == shaders.size - 1) {
                 shader.isFlipVertical = true
-                shader.draw(frameBuffers[index - 1].toTexture())
+                shader.draw(frameBuffers[index - 1].asTexture())
                 continue
             }
 
             frameBuffers[index].use {
-                shader.draw(frameBuffers[index - 1].toTexture())
+                shader.draw(frameBuffers[index - 1].asTexture())
             }
         }
     }
@@ -89,12 +89,12 @@ class CompositeShader(private val shaders: ArrayList<TextureShader> = arrayListO
 
             if (index == shaders.size - 1) {
                 shader.isFlipVertical = true
-                shader.draw(frameBuffers[index - 1].toTexture())
+                shader.draw(frameBuffers[index - 1].asTexture())
                 continue
             }
 
             frameBuffers[index].use {
-                shader.draw(frameBuffers[index - 1].toTexture())
+                shader.draw(frameBuffers[index - 1].asTexture())
             }
         }
     }

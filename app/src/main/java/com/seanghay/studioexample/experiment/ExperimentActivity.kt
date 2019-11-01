@@ -18,6 +18,7 @@ class ExperimentActivity : AppCompatActivity() {
                 .add(R.id.containerView, fragment, "studio")
                 .setPrimaryNavigationFragment(fragment)
                 .commitNow()
+
         }
     }
 }

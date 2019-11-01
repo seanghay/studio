@@ -16,6 +16,7 @@
 package com.seanghay.studio.gles.shader
 
 import android.opengl.GLES20
+import android.opengl.GLES20.GL_TRIANGLE_STRIP
 import com.seanghay.studio.gles.annotation.GlContext
 import com.seanghay.studio.gles.egl.glScope
 import com.seanghay.studio.gles.graphics.Matrix4f
@@ -31,9 +32,9 @@ import com.seanghay.studio.gles.graphics.vec2
 import com.seanghay.studio.utils.BasicVertices
 
 open class TextureShader(
-    override var vertexShaderSource: String = VERTEX_SHADER,
-    override var fragmentShaderSource: String = FRAGMENT_SHADER,
-    var coords: FloatArray = BasicVertices.FULL_RECTANGLE
+  override var vertexShaderSource: String = VERTEX_SHADER,
+  override var fragmentShaderSource: String = FRAGMENT_SHADER,
+  var coords: FloatArray = BasicVertices.FULL_RECTANGLE
 ) : Shader() {
 
     var hasExternalTexture = false
@@ -82,7 +83,6 @@ open class TextureShader(
         return transformFragmentShader(fragmentShaderSource)
     }
 
-
     @GlContext
     fun updatePositionAttr() {
         positionAttr = VertexAttribute(
@@ -125,7 +125,7 @@ open class TextureShader(
                 texture.use(GLES20.GL_TEXTURE_2D) {
                     writeUniforms()
                     beforeDrawVertices()
-                    drawArrays()
+                    drawArrays(GL_TRIANGLE_STRIP)
                     afterDrawVertices()
                 }
             }

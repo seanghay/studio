@@ -8,7 +8,6 @@ import android.opengl.GLES20.glClear
 import android.opengl.GLES20.glClearColor
 import android.opengl.GLES20.glViewport
 import android.opengl.GLUtils
-import android.opengl.Matrix
 import android.util.Log
 import androidx.annotation.AnyThread
 import androidx.annotation.UiThread
@@ -17,6 +16,7 @@ import com.seanghay.studio.gles.egl.EglCore
 import com.seanghay.studio.gles.egl.EglSurfaceBase
 import com.seanghay.studio.gles.egl.EglWindowSurface
 import com.seanghay.studio.gles.egl.glScope
+import com.seanghay.studio.gles.graphics.FrameBuffer
 import com.seanghay.studio.gles.graphics.texture.Texture2d
 import com.seanghay.studio.gles.shader.TextureShader
 import com.seanghay.studio.utils.BitmapProcessor
@@ -37,16 +37,9 @@ data class EditorScene(
 
 class EditorEngine private constructor() {
 
-
-    // Frame rate
-    private var lastLoopTime = System.nanoTime()
-    private var targetFps = 60
-    private var optimalTime = 1000000000 / targetFps
-    private var lastFpsTime = 0L
-    private var fps = 0
-
     private var thread: EditorThread? = null
     private var eglCore: EglCore? = null
+
     private var isThreadStarted = false
     private var isEglConfigured = false
     private var eglSurfaceBase: EglSurfaceBase? = null
@@ -54,13 +47,17 @@ class EditorEngine private constructor() {
 
     private var viewportWidth = NO_VALUE
     private var viewportHeight = NO_VALUE
+
     private val frame = FrameConstraint(30.0, frameRateObservable)
     private var clearColor = floatArrayOf(0f, 0f, 0f, 1f)
 
     private val editorScenes = mutableListOf<EditorScene>()
+
     private val shader = TextureShader()
+    private val frameBufferShader = TextureShader()
 
     private var displayIndex = 0
+    private val frameBuffer = FrameBuffer()
 
     private val renderer: EditorRenderer = object : EditorRenderer {
         override fun onDrawFrame() {
@@ -110,6 +107,9 @@ class EditorEngine private constructor() {
         eglSurfaceBase?.makeCurrent()
         shader.setup()
         shader.setResolution(viewportWidth.toFloat(), viewportHeight.toFloat())
+        frameBufferShader.setup()
+        frameBufferShader.setResolution(viewportWidth.toFloat(), viewportHeight.toFloat())
+        frameBuffer.setup(viewportWidth, viewportHeight)
     }
 
     fun getFrameRateFlowable(): Flowable<Float> {
@@ -142,60 +142,38 @@ class EditorEngine private constructor() {
             glViewport(0, 0, viewportWidth, viewportHeight)
 
             val ratio = viewportWidth.toFloat() / viewportHeight.toFloat()
+            val elements = shader.mvpMatrix.elements
 
-            Matrix.setIdentityM(shader.mvpMatrix.elements, 0)
-            Matrix.setIdentityM(viewMatrix, 0)
-            Matrix.frustumM(shader.mvpMatrix.elements, 0, -ratio, ratio, -1f, 1f, 3f, 7f)
 
-            Matrix.setLookAtM(
-                viewMatrix,
-                0,
-                0f,
-                0f,
-                -3f,
-                0f,
-                0f,
-                0f,
-                0f,
-                1.0f,
-                0.0f
-            )
+//            ProjectionUtils.identities(elements, viewMatrix)
+//            ProjectionUtils.applyAspectRatio(elements, ratio)
+//            ProjectionUtils.applyLookAt(viewMatrix)
+//            ProjectionUtils.times(elements, elements, viewMatrix)
 
-            Matrix.multiplyMM(
-                shader.mvpMatrix.elements,
-                0,
-                shader.mvpMatrix.elements,
-                0,
-                viewMatrix,
-                0
-            )
+
         }
     }
 
 
     // mostly OpenGL api calls
     private fun internalDrawFrame() {
-
-        val now = System.nanoTime()
-        val updateLength = now - lastLoopTime
-        lastLoopTime = now
-        lastFpsTime += updateLength
-        fps++
-
-        if (lastFpsTime >= 1000000000) {
-            lastFpsTime = 0
-            fps = 0
-        }
-
         if (eglSurfaceBase == null) return
         eglSurfaceBase?.makeCurrent()
 
         configureViewport()
-        editorScenes.getOrNull(displayIndex)?.texture?.let { texture ->
+        clearColors()
+
+        val frame = editorScenes.getOrNull(0) ?: return
+
+        frameBuffer.use {
+            configureViewport()
             clearColors()
-            shader.draw(texture)
-            eglSurfaceBase?.swapBuffers()
+            shader.updatePositionAttr()
+            shader.draw(frame.texture)
         }
+
+        frameBufferShader.draw(frameBuffer.asTexture())
+        eglSurfaceBase?.swapBuffers()
     }
 
     private fun clearColors() {
@@ -280,22 +258,41 @@ class EditorEngine private constructor() {
 
     @UiThread
     fun release() {
+
         if (VERBOSE) Log.d(TAG, "editor release request")
 
-        // Signal stop
-        thread?.signalStop()
-        thread = null
+        post {
+            editorScenes.forEach { it.texture.release() }
+            shader.release()
+            frameBufferShader.release()
+        }
+
+        post {
+            eglSurfaceBase?.releaseEglSurface()
+            eglSurfaceBase = null
+
+            // release EglCore
+            eglCore?.release()
+            eglCore = null
+        }
 
         // release surface
-        eglSurfaceBase?.releaseEglSurface()
-        eglSurfaceBase = null
 
-        // release EglCore
-        eglCore?.release()
-        eglCore = null
+        post {
+            editorEngine = null
+        }
 
-        isThreadStarted = false
-        isEglConfigured = false
+        post {
+            // Signal stop
+            thread?.signalStop()
+            thread = null
+
+
+            isThreadStarted = false
+            isEglConfigured = false
+        }
+
+
 
         if (VERBOSE) Log.d(TAG, "editor has been released")
     }
@@ -304,6 +301,7 @@ class EditorEngine private constructor() {
         post {
             if (VERBOSE) Log.d(TAG, "Attach bitmaps")
             val bitmaps = paths.associateWith { BitmapProcessor.loadSync(it) }
+
             val scenes = bitmaps.map {
                 glScope("Convert bitmap to texture") {
                     val texture = Texture2d()
@@ -314,14 +312,16 @@ class EditorEngine private constructor() {
                         if (VERBOSE) Log.d(TAG, "Bind texture ${texture.id}")
                     }
 
-                    EditorScene(it.key, texture, it.value.width, it.value.height)
+                    EditorScene(it.key, texture, it.value.width, it.value.height).apply {
+                        it.value.recycle()
+                    }
                 }
             }
 
             editorScenes.addAll(scenes)
             if (VERBOSE) Log.d(TAG, "Attached bitmaps")
-        }
 
+        }
 
     }
 
@@ -360,7 +360,7 @@ class EditorEngine private constructor() {
                 if (System.currentTimeMillis() - timer > 1000) {
                     timer += 1000
                     frameRateObservable.onNext(frames.toFloat())
-                    Log.d(TAG, "frame constraint: updates $updates, $frames fps")
+                    // Log.d(TAG, "frame constraint: updates $updates, $frames fps")
                     updates = 0
                     frames = 0
                 }

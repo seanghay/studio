@@ -17,7 +17,6 @@ package com.seanghay.studio.internal
 
 import android.util.Log
 import androidx.annotation.IntDef
-import com.seanghay.studio.sonic.Sonic
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Any.logger(): Logger {

@@ -191,7 +191,7 @@ open class FrameBuffer(width: Int = 0, height: Int = 0) {
         frameBufferName = 0
     }
 
-    fun toTexture(): Texture {
+    fun asTexture(): Texture {
         return texture ?: throw RuntimeException("Texture was null did you setup it yet?")
     }
 }

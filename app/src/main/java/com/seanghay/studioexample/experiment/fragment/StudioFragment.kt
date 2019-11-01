@@ -131,11 +131,13 @@ class StudioFragment : Fragment() {
             for (bitmap in bitmaps) {
                 val file = File(compressDir, bitmap.first + ".jpg")
                 val outputStream = FileOutputStream(file)
-                outputStream.use { bitmap.second?.compress(Bitmap.CompressFormat.JPEG, 10, it) }
+                outputStream.use { bitmap.second?.compress(Bitmap.CompressFormat.JPEG, 50, it) }
                 files.add(file.path)
+                bitmap.second?.recycle()
             }
 
             viewModel.compressedPhotos.addAll(files)
+
             launch(context = Dispatchers.Main) {
                 Toast.makeText(requireContext(), "Done", Toast.LENGTH_SHORT).show()
                 viewModel.isLoading.value = false
@@ -211,9 +213,7 @@ class StudioFragment : Fragment() {
 
             if (list.isNotEmpty()) {
                 viewModel.photos.addAll(list)
-
                 lifecycleScope.launch { requestRender() }
-
             }
         }
     }

@@ -81,7 +81,6 @@ class VideoComposer(private val context: Context) : StudioDrawable {
     private val slideQuoteShader = AlphaOverlayTextureShader()
     private val slideQuotesTextures = SparseArray<Texture2d>()
 
-
     // Kenburns Effect
     private var mvpMatrix = mat4()
     private val kenburnsMatrix = mat4()
@@ -224,6 +223,7 @@ class VideoComposer(private val context: Context) : StudioDrawable {
             last += it.duration
             last
         }.toLongArray()
+
     }
 
     override fun onSetup() {
@@ -428,9 +428,11 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         val offset = calculateSeekOffset(seekIndex, seekAt)
         val currentScene = scenes[seekIndex]
 
+
         val currentTexture = currentScene.texture
         val nextScene = scenes.getOrNull(seekIndex + 1)
         val nextTexture = nextScene?.texture ?: blankTexture
+
 
         val textureShader = textureShaders[currentScene.transition.name] ?: return false
         val interpolatedOffset = interpolateOffset(currentScene, offset).smoothStep(0f, 1f)
@@ -455,11 +457,11 @@ class VideoComposer(private val context: Context) : StudioDrawable {
 
         filterShader.applyPackFilter(nextScene?.filter ?: defaultPack)
         filterFrameBuffer.use {
-            textureShader.draw(fromFrameBuffer.toTexture(), toFrameBuffer.toTexture())
+            textureShader.draw(fromFrameBuffer.asTexture(), toFrameBuffer.asTexture())
         }
 
         applyFilterPack(defaultFilterPack, false)
-        filterShader.draw(filterFrameBuffer.toTexture())
+        filterShader.draw(filterFrameBuffer.asTexture())
 
         quoteShader.mvpMatrix = mvpMatrix
         quoteShader.draw(quoteTexture)
@@ -480,7 +482,7 @@ class VideoComposer(private val context: Context) : StudioDrawable {
         watermarkShader.draw(watermarkTexture)
 
 //        toneCurveFilterShader.mvpMatrix = mvpMatrix
-//        toneCurveFilterShader.draw(toneCurveFrameBuffer.toTexture())
+//        toneCurveFilterShader.draw(toneCurveFrameBuffer.asTexture())
         run(postDrawRunnables)
         return true
     }

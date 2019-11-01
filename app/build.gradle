@@ -52,13 +52,16 @@ dependencies {
     implementation "com.google.android.material:material:$versions.material"
     implementation 'com.squareup.picasso:picasso:2.71828'
 
-    def room_version = "2.2.0"
-
+    def room_version = "2.2.1"
+    
     implementation 'com.chauthai.overscroll:overscroll-bouncy:0.1.1'
 
     implementation "androidx.room:room-runtime:$room_version"
-    kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
+    implementation "androidx.room:room-rxjava2:$room_version"
+
+    kapt "androidx.room:room-compiler:$room_version"
+
     implementation 'id.zelory:compressor:2.1.0'
 
     implementation "com.github.skydoves:colorpickerview:2.1.5"
@@ -74,6 +77,10 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxkotlin:2.4.0"
 
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0-beta01"
+
+
+    implementation 'com.github.bumptech.glide:glide:4.10.0'
+    kapt 'com.github.bumptech.glide:compiler:4.10.0'
 
 
     testImplementation 'junit:junit:4.12'
