@@ -13,3 +13,6 @@ dependencies {
    implementation 'com.seanghay:studio:1.0.0-alpha04'
 }
 ```
+
+
+> Pull requests are welcomed!
